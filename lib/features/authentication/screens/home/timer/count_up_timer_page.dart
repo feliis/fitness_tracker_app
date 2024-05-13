@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
+import '../../../../../utils/const/sizes.dart';
 import '../../profile/appbar.dart';
 import '../pedometer.dart';
 
@@ -21,11 +24,11 @@ class CountUpTimerPage extends StatefulWidget {
 class _State extends State<CountUpTimerPage> {
   late Stream<StepCount> _stepCountStream;
   late Stream<PedestrianStatus> _pedestrianStatusStream;
-  String _status = '?';
-  int _steps = 0;
-  int stepPrev = 0;
-  int stepNew = 0;
   bool recordWorkout = false;
+  String _status = '?';
+  int _steps = 0, _stepsPrev = 0, _stepsNow = 0, calories = 0;
+  double dist = 0.00, speed = 0.00;
+  double averageRate = 0.00;
 
   final _isHours = true;
 
@@ -62,10 +65,16 @@ class _State extends State<CountUpTimerPage> {
     // _stopWatchTimer.setPresetTime(mSec: 1234);
   }
 
+  double roundDouble(double value, int places) {
+    num mod = pow(10.0, places);
+    return ((value * mod).round().toDouble() / mod);
+  }
+
   void onStepCount(StepCount event) {
     print(event);
     setState(() {
-      _steps = event.steps - stepPrev;
+      _steps = event.steps - _stepsPrev;
+      dist = roundDouble((0.00072 * _steps), 2);
     });
   }
 
@@ -106,16 +115,16 @@ class _State extends State<CountUpTimerPage> {
   void onStart() {
     recordWorkout = true;
     _stopWatchTimer.onStartTimer();
-    stepPrev = _steps;
-    print(stepPrev);
+    _stepsPrev = _steps;
+    print(_stepsPrev);
   }
 
   void onStop() {
     recordWorkout = false;
     _stopWatchTimer.onStopTimer();
-    stepPrev = 0;
-    stepNew = _steps;
-    print(stepNew);
+    _stepsPrev = 0;
+    _stepsNow = _steps;
+    print(_stepsNow);
   }
 
   @override
@@ -129,7 +138,7 @@ class _State extends State<CountUpTimerPage> {
     return Scaffold(
       appBar: const PAppBar(
         showBackArrow: true,
-        title: Text('Секундомер'),
+        title: Text('Тренировка'),
       ),
       body: Scrollbar(
         child: SingleChildScrollView(
@@ -148,16 +157,20 @@ class _State extends State<CountUpTimerPage> {
                   initialData: _stopWatchTimer.rawTime.value,
                   builder: (context, snap) {
                     final value = snap.data!;
-                    final displayTime =
+                    final time =
                         StopWatchTimer.getDisplayTime(value, hours: _isHours);
                     return Column(
                       children: <Widget>[
+                        Text(
+                          'Время',
+                          style: TextStyle(fontSize: 18),
+                        ),
                         Padding(
                           padding: const EdgeInsets.all(8),
                           child: Text(
-                            displayTime,
+                            time,
                             style: const TextStyle(
-                                fontSize: 40,
+                                fontSize: 38,
                                 fontFamily: 'Helvetica',
                                 fontWeight: FontWeight.bold),
                           ),
@@ -167,43 +180,160 @@ class _State extends State<CountUpTimerPage> {
                   },
                 ),
 
-                /// Display every minute.
-                StreamBuilder<int>(
-                  stream: _stopWatchTimer.minuteTime,
-                  initialData: _stopWatchTimer.minuteTime.value,
-                  builder: (context, snap) {
-                    final value = snap.data;
-                    print('Listen every minute. $value');
-                    return const Column(
+                const SizedBox(height: PSizes.spaceBtwInputFields * 2),
+
+                /// Distance & Steps
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.all(8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                          ),
+                        Text(
+                          'Расстояние',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              recordWorkout ? '$dist' : '0.00',
+                              style: const TextStyle(
+                                  fontSize: 38,
+                                  fontFamily: 'Helvetica',
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(width: PSizes.spaceBtwInputFields),
+                            Text(
+                              'км',
+                              style: const TextStyle(
+                                  fontSize: 22,
+                                  fontFamily: 'Helvetica',
+                                  fontWeight: FontWeight.normal),
+                            ),
+                          ],
                         ),
                       ],
-                    );
-                  },
+                    ),
+                    const SizedBox(width: PSizes.spaceBtwInputFields * 4),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          'Шаги',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        Text(
+                          recordWorkout ? '$_steps' : '0',
+                          style: const TextStyle(
+                              fontSize: 38,
+                              fontFamily: 'Helvetica',
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
 
-                /// Pedometer
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        'Steps Taken',
-                        style: TextStyle(fontSize: 30),
-                      ),
-                      Text(
-                        recordWorkout ? '$_steps' : '0',
-                        style: TextStyle(fontSize: 60),
-                      ),
-                    ],
-                  ),
+                const SizedBox(height: PSizes.spaceBtwInputFields * 2),
+
+                /// Speed and Average rate
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Скорость',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              recordWorkout ? '$speed' : '--',
+                              style: const TextStyle(
+                                  fontSize: 38,
+                                  fontFamily: 'Helvetica',
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(width: PSizes.spaceBtwInputFields),
+                            Text(
+                              'км/ч',
+                              style: const TextStyle(
+                                  fontSize: 22,
+                                  fontFamily: 'Helvetica',
+                                  fontWeight: FontWeight.normal),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: PSizes.spaceBtwInputFields * 4),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Темп',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              recordWorkout ? '$averageRate' : '--',
+                              style: const TextStyle(
+                                  fontSize: 38,
+                                  fontFamily: 'Helvetica',
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(width: PSizes.spaceBtwInputFields),
+                            Text(
+                              '/км',
+                              style: const TextStyle(
+                                  fontSize: 22,
+                                  fontFamily: 'Helvetica',
+                                  fontWeight: FontWeight.normal),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
+
+                const SizedBox(height: PSizes.spaceBtwInputFields * 2),
+
+                /// Calories
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Калории',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          recordWorkout ? '$calories' : '0',
+                          style: const TextStyle(
+                              fontSize: 38,
+                              fontFamily: 'Helvetica',
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: PSizes.spaceBtwInputFields),
+                        Text(
+                          'ккал',
+                          style: const TextStyle(
+                              fontSize: 22,
+                              fontFamily: 'Helvetica',
+                              fontWeight: FontWeight.normal),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: PSizes.spaceBtwSections),
 
                 /// Button
                 Row(
