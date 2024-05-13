@@ -17,7 +17,13 @@ class PedometerPage extends StatefulWidget {
 class _MyAppState extends State<PedometerPage> {
   late Stream<StepCount> _stepCountStream;
   late Stream<PedestrianStatus> _pedestrianStatusStream;
-  String _status = '?', _steps = '?';
+  String _status = '?';
+  int _steps = 0;
+  int stepPrev = 0;
+  int stepNew = 0;
+  late int todaySteps;
+  late DateTime start;
+  late DateTime finish;
 
   @override
   void initState() {
@@ -28,10 +34,12 @@ class _MyAppState extends State<PedometerPage> {
   void onStepCount(StepCount event) {
     print(event);
     setState(() {
-      _steps = event.steps.toString();
+      _steps = event.steps;
     });
   }
+  // Int calculate_steps(){
 
+  // }
   void onPedestrianStatusChanged(PedestrianStatus event) {
     print(event);
     setState(() {
@@ -50,7 +58,7 @@ class _MyAppState extends State<PedometerPage> {
   void onStepCountError(error) {
     print('onStepCountError: $error');
     setState(() {
-      _steps = 'Step Count not available';
+      _steps = 0;
     });
   }
 
@@ -82,9 +90,14 @@ class _MyAppState extends State<PedometerPage> {
                 style: TextStyle(fontSize: 30),
               ),
               Text(
-                _steps,
+                '$_steps',
                 style: TextStyle(fontSize: 60),
               ),
+              // Text(
+              //   '$todaySteps',
+              //   // 'начало трени ${now.hour} ${now.minute} ${now.second}',
+              //   style: TextStyle(fontSize: 60),
+              // ),
               Divider(
                 height: 100,
                 thickness: 0,
@@ -94,6 +107,7 @@ class _MyAppState extends State<PedometerPage> {
                 'Pedestrian Status',
                 style: TextStyle(fontSize: 30),
               ),
+
               Icon(
                 _status == 'walking'
                     ? Icons.directions_walk
