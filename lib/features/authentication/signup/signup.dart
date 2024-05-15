@@ -1,13 +1,14 @@
 // import 'package:fitness_tracker_app/helper_functions.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:fitness_tracker_app/utils/const/sizes.dart';
+import 'package:fitness_tracker_app/utils/const/text_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:fitness_tracker_app/utils/const/text_strings.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
-import '../../../../helper_functions.dart';
-import '../../../../navigation_menu.dart';
-import '../../../../utils/const/colors.dart';
+
+import '../../../navigation_menu.dart';
+import '../../../utils/const/colors.dart';
+import '../../../utils/helper_functions.dart';
 
 class SignupScreen extends StatelessWidget {
   const SignupScreen({super.key});

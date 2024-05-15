@@ -1,4 +1,4 @@
-import 'package:fitness_tracker_app/features/authentication/controllers.onboarding/onboarding_controller.dart';
+import 'package:fitness_tracker_app/features/screens/onboarding/controllers.onboarding/onboarding_controller.dart';
 import 'package:fitness_tracker_app/utils/const/sizes.dart';
 import 'package:fitness_tracker_app/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';

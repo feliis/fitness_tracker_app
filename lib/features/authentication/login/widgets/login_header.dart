@@ -1,9 +1,9 @@
-import 'package:fitness_tracker_app/helper_functions.dart';
+import 'package:fitness_tracker_app/utils/helper_functions.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../utils/const/image_strings.dart';
-import '../../../../../utils/const/sizes.dart';
-import '../../../../../utils/const/text_strings.dart';
+import '../../../../utils/const/image_strings.dart';
+import '../../../../utils/const/sizes.dart';
+import '../../../../utils/const/text_strings.dart';
 
 class PLoginHeader extends StatelessWidget {
   const PLoginHeader({

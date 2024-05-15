@@ -1,10 +1,11 @@
-import 'package:fitness_tracker_app/features/authentication/screens/signup.widgets/signup.dart';
+import 'package:fitness_tracker_app/features/authentication/signup/signup.dart';
+import 'package:fitness_tracker_app/utils/const/sizes.dart';
+import 'package:fitness_tracker_app/utils/const/text_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:fitness_tracker_app/utils/const/sizes.dart';
-import '../../../../../navigation_menu.dart';
-import 'package:fitness_tracker_app/utils/const/text_strings.dart';
+
+import '../../../../navigation_menu.dart';
 
 class PLoginForm extends StatelessWidget {
   const PLoginForm({super.key});

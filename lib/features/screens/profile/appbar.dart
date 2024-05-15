@@ -2,9 +2,10 @@ import 'package:fitness_tracker_app/utils/device/device_utility.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import '../../../../helper_functions.dart';
-import '../../../../utils/const/colors.dart';
-import '../../../../utils/const/sizes.dart';
+
+import '../../../utils/const/colors.dart';
+import '../../../utils/const/sizes.dart';
+import '../../../utils/helper_functions.dart';
 
 class PAppBar extends StatelessWidget implements PreferredSizeWidget {
   const PAppBar({

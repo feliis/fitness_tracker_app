@@ -2,9 +2,10 @@ import 'package:fitness_tracker_app/utils/const/image_strings.dart';
 import 'package:fitness_tracker_app/utils/const/text_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../controllers.onboarding/onboarding_controller.dart';
-import 'widgets/onboarding_dot_navigation.dart';
+
+import 'controllers.onboarding/onboarding_controller.dart';
 import 'widgets/next_button.dart';
+import 'widgets/onboarding_dot_navigation.dart';
 import 'widgets/onboarding_page.dart';
 import 'widgets/onboarding_skip.dart';
 

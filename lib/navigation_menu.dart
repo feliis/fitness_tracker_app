@@ -1,12 +1,11 @@
-import 'package:fitness_tracker_app/features/authentication/screens/profile/profile.dart';
+import 'package:fitness_tracker_app/features/screens/profile/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-import 'features/authentication/screens/home/home.dart';
-import 'features/authentication/screens/home/pedometer_page.dart';
-import 'helper_functions.dart';
+import 'features/screens/home/home.dart';
 import 'utils/const/colors.dart';
+import 'utils/helper_functions.dart';
 
 class NavigationMenu extends StatelessWidget {
   const NavigationMenu({super.key});
@@ -43,7 +42,7 @@ class NavigationController extends GetxController {
 
   final screens = [
     MainPage(),
-    PedometerPage(),
+    MainPage(),
     const ProfileScreen(),
   ];
 }

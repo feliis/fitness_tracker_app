@@ -1,12 +1,12 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:pedometer/pedometer.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
-import '../../../../../utils/const/colors.dart';
-import '../../../../../utils/const/sizes.dart';
+import '../../../../utils/const/colors.dart';
+import '../../../../utils/const/sizes.dart';
 import '../../profile/appbar.dart';
-import '../pedometer.dart';
 
 class CountUpTimerPage extends StatefulWidget {
   static Future<void> navigatorPush(BuildContext context) async {
