@@ -9,6 +9,7 @@ import 'utils/helper_functions.dart';
 
 class NavigationMenu extends StatelessWidget {
   const NavigationMenu({super.key});
+  static const String route = 'HomePage';
 
   @override
   Widget build(BuildContext context) {

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
+import '../../../../model/auth_model.dart';
 import '../../../../navigation_menu.dart';
 
 class PLoginForm extends StatelessWidget {
@@ -24,6 +25,7 @@ class PLoginForm extends StatelessWidget {
           /// Phone
           TextFormField(
             controller: controller.phone,
+            onSaved: (value) => user.phone = value ?? '0',
             validator: (value) => Validator.validatePhone(value),
             decoration: const InputDecoration(
                 prefixIcon: Icon(Iconsax.call), labelText: PTexts.phoneNo),
@@ -34,6 +36,7 @@ class PLoginForm extends StatelessWidget {
           Obx(
             () => TextFormField(
               controller: controller.password,
+              onSaved: (value) => user.password = value ?? '0',
               validator: (value) => Validator.validateEmptyText(value),
               obscureText: controller.hidePassword.value,
               decoration: InputDecoration(
@@ -76,4 +79,13 @@ class PLoginForm extends StatelessWidget {
       ),
     );
   }
+}
+
+void tryLogin(BuildContext context) {
+  // RestAPI().login(phone: user.phone, password: user.password).then(
+  //       (value) => Navigator.of(context).pushNamedAndRemoveUntil(
+  //         NavigationMenu.route,
+  //         (route) => false,
+  //       ),
+  //     );
 }
