@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
+import '../../../../../utils/const/colors.dart';
 import '../../../../../utils/const/sizes.dart';
 import '../../profile/appbar.dart';
 import '../pedometer.dart';
@@ -26,17 +27,21 @@ class _State extends State<CountUpTimerPage> {
   late Stream<PedestrianStatus> _pedestrianStatusStream;
   bool recordWorkout = false;
   String _status = '?';
-  int _steps = 0, _stepsPrev = 0, _stepsNow = 0, calories = 0;
-  double dist = 0.00, speed = 0.00;
-  double averageRate = 0.00;
+  int _steps = 0,
+      _stepsPrev = 0,
+      _stepsNow = 0,
+      calories = 0,
+      milisecond = 0,
+      time = 0;
+  double dist = 0.00, speed = 0.00, weight = 68.5, height = 170.0;
+  String pace = '0' + "'" + '00' + '"';
+  String buttonText = 'Начать';
+  Color buttonColor = PColors.primary;
 
   final _isHours = true;
 
   final StopWatchTimer _stopWatchTimer = StopWatchTimer(
     mode: StopWatchMode.countUp,
-    // onChange: (value) => print('onChange $value'),
-    // onChangeRawSecond: (value) => print('onChangeRawSecond $value'),
-    // onChangeRawMinute: (value) => print('onChangeRawMinute $value'),
     onStopped: () {
       print('onStop');
     },
@@ -50,19 +55,7 @@ class _State extends State<CountUpTimerPage> {
   @override
   void initState() {
     super.initState();
-    // _stopWatchTimer.rawTime.listen((value) =>
-    //     print('rawTime $value ${StopWatchTimer.getDisplayTime(value)}'));
-    // _stopWatchTimer.minuteTime.listen((value) => print('minuteTime $value'));
-    // _stopWatchTimer.secondTime.listen((value) => print('secondTime $value'));
-    // _stopWatchTimer.records.listen((value) => print('records $value'));
-    // _stopWatchTimer.fetchStopped
-    //     .listen((value) => print('stopped from stream'));
-    // _stopWatchTimer.fetchEnded.listen((value) => print('ended from stream'));
-
     initPlatformState();
-
-    /// Can be set preset time. This case is "00:01.23".
-    // _stopWatchTimer.setPresetTime(mSec: 1234);
   }
 
   double roundDouble(double value, int places) {
@@ -71,10 +64,31 @@ class _State extends State<CountUpTimerPage> {
   }
 
   void onStepCount(StepCount event) {
-    print(event);
+    _stopWatchTimer.rawTime.listen((value) => setSpeed(value.toInt()));
     setState(() {
       _steps = event.steps - _stepsPrev;
       dist = roundDouble((0.00072 * _steps), 2);
+    });
+  }
+
+  void setSpeed(int time) {
+    setState(() {
+      double minutes = (time / 60000);
+      double s = (dist / (minutes / 60));
+      speed = double.parse(s.toStringAsFixed(2));
+      double p = 60 / speed;
+
+      int paceSeconds =
+          ((double.parse(p.toStringAsFixed(2)) - p.floor()) * 60).toInt();
+      int paceMinutes = p.toInt();
+      pace = paceMinutes.toString() + "'" + paceSeconds.toString() + '"';
+
+      double c = (0.035 * weight + (speed / height) * 0.029 * weight) * minutes;
+      calories = c.toInt();
+      if (speed == double.infinity || pace == double.infinity) {
+        speed = 0.00;
+        pace = '0' + "'" + '00' + '"';
+      }
     });
   }
 
@@ -113,10 +127,25 @@ class _State extends State<CountUpTimerPage> {
   }
 
   void onStart() {
-    recordWorkout = true;
-    _stopWatchTimer.onStartTimer();
-    _stepsPrev = _steps;
-    print(_stepsPrev);
+    setState(
+      () {
+        recordWorkout = true;
+        _stopWatchTimer.onStartTimer();
+        _stepsPrev = _steps;
+        _steps -= _stepsPrev;
+        dist = 0.00;
+        speed = 0.00;
+        pace = '0' + "'" + '00' + '"';
+        calories = 0;
+        if (buttonText == "Начать") {
+          buttonText = "Завершить";
+          buttonColor = PColors.error;
+        } else {
+          buttonText = "Начать";
+          buttonColor = PColors.primary;
+        }
+      },
+    );
   }
 
   void onStop() {
@@ -124,7 +153,6 @@ class _State extends State<CountUpTimerPage> {
     _stopWatchTimer.onStopTimer();
     _stepsPrev = 0;
     _stepsNow = _steps;
-    print(_stepsNow);
   }
 
   @override
@@ -151,6 +179,8 @@ class _State extends State<CountUpTimerPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
+                const SizedBox(height: PSizes.spaceBtwSections),
+
                 /// Display stop watch time
                 StreamBuilder<int>(
                   stream: _stopWatchTimer.rawTime,
@@ -170,7 +200,7 @@ class _State extends State<CountUpTimerPage> {
                           child: Text(
                             time,
                             style: const TextStyle(
-                                fontSize: 38,
+                                fontSize: 28,
                                 fontFamily: 'Helvetica',
                                 fontWeight: FontWeight.bold),
                           ),
@@ -198,7 +228,7 @@ class _State extends State<CountUpTimerPage> {
                             Text(
                               recordWorkout ? '$dist' : '0.00',
                               style: const TextStyle(
-                                  fontSize: 38,
+                                  fontSize: 28,
                                   fontFamily: 'Helvetica',
                                   fontWeight: FontWeight.bold),
                             ),
@@ -214,7 +244,7 @@ class _State extends State<CountUpTimerPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(width: PSizes.spaceBtwInputFields * 4),
+                    const SizedBox(width: PSizes.spaceBtwInputFields * 3),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
@@ -225,7 +255,7 @@ class _State extends State<CountUpTimerPage> {
                         Text(
                           recordWorkout ? '$_steps' : '0',
                           style: const TextStyle(
-                              fontSize: 38,
+                              fontSize: 28,
                               fontFamily: 'Helvetica',
                               fontWeight: FontWeight.bold),
                         ),
@@ -236,7 +266,7 @@ class _State extends State<CountUpTimerPage> {
 
                 const SizedBox(height: PSizes.spaceBtwInputFields * 2),
 
-                /// Speed and Average rate
+                /// Speed and pace
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -252,7 +282,7 @@ class _State extends State<CountUpTimerPage> {
                             Text(
                               recordWorkout ? '$speed' : '--',
                               style: const TextStyle(
-                                  fontSize: 38,
+                                  fontSize: 28,
                                   fontFamily: 'Helvetica',
                                   fontWeight: FontWeight.bold),
                             ),
@@ -268,7 +298,7 @@ class _State extends State<CountUpTimerPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(width: PSizes.spaceBtwInputFields * 4),
+                    const SizedBox(width: PSizes.spaceBtwInputFields * 3),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -279,9 +309,9 @@ class _State extends State<CountUpTimerPage> {
                         Row(
                           children: [
                             Text(
-                              recordWorkout ? '$averageRate' : '--',
+                              recordWorkout ? pace : '--',
                               style: const TextStyle(
-                                  fontSize: 38,
+                                  fontSize: 28,
                                   fontFamily: 'Helvetica',
                                   fontWeight: FontWeight.bold),
                             ),
@@ -314,9 +344,9 @@ class _State extends State<CountUpTimerPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          recordWorkout ? '$calories' : '0',
+                          recordWorkout ? '$calories' : '0' + "'" + '00' + '"',
                           style: const TextStyle(
-                              fontSize: 38,
+                              fontSize: 28,
                               fontFamily: 'Helvetica',
                               fontWeight: FontWeight.bold),
                         ),
@@ -333,46 +363,20 @@ class _State extends State<CountUpTimerPage> {
                   ],
                 ),
 
-                const SizedBox(height: PSizes.spaceBtwSections),
+                const SizedBox(height: PSizes.spaceBtwSections * 2),
 
                 /// Button
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: FilledButton(
-                          onPressed: onStart,
-                          child: const Text(
-                            'Start',
-                          ),
-                        ),
-                      ),
+
+                SizedBox(
+                  width: 250,
+                  child: ElevatedButton(
+                    onPressed: recordWorkout ? onStop : onStart,
+                    child: Text(buttonText),
+                    style: ElevatedButton.styleFrom(
+                      side: const BorderSide(color: Color.fromARGB(0, 0, 0, 0)),
+                      backgroundColor: buttonColor,
                     ),
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: FilledButton(
-                          onPressed: onStop,
-                          child: const Text(
-                            'Stop',
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Flexible(
-                    //   child: Padding(
-                    //     padding: const EdgeInsets.symmetric(horizontal: 4),
-                    //     child: FilledButton(
-                    //       onPressed: _stopWatchTimer.onResetTimer,
-                    //       child: const Text(
-                    //         'Reset',
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ),
-                  ],
+                  ),
                 ),
               ],
             ),

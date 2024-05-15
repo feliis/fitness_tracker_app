@@ -17,9 +17,10 @@ class NextButton extends StatelessWidget {
       right: PSizes.defaultSpace,
       bottom: PDeviceUtils.getBottomNavigationBarHeight(),
       child: ElevatedButton(
-        onPressed: () => OnBoardingController.instance.nextPage,
+        onPressed: () => OnBoardingController.instance.nextPage(),
         style: ElevatedButton.styleFrom(
             shape: const CircleBorder(),
+            side: const BorderSide(color: Color.fromARGB(0, 0, 0, 0)),
             backgroundColor: dark ? PColors.primary : Colors.black),
         child: const Icon(Iconsax.arrow_right_3),
       ),
