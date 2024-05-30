@@ -1,8 +1,8 @@
 import 'package:fitness_tracker_app/utils/helper_functions.dart';
 import 'package:flutter/material.dart';
 
-import '../../../utils/const/colors.dart';
-import '../../../utils/const/sizes.dart';
+import '../../utils/const/colors.dart';
+import '../../utils/const/sizes.dart';
 
 class PCircularImage extends StatelessWidget {
   const PCircularImage({

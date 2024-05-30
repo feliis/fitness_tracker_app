@@ -10,13 +10,17 @@ class RestAPI {
   RestAPI._internal();
   static final RestAPI _singleton = RestAPI._internal();
 
+  /// prod address
+  static String address = '31.128.38.74:8080';
+
   /// Grab AuthToken
-  Future<void> login({required String phone, required String password}) async {
+  Future<void> login({required String name, required String password}) async {
     final response = await http.post(
-      Uri.http('/api/auth/client/request'),
+      Uri.http(address, '/login'),
       headers: {HttpHeaders.contentTypeHeader: 'application/json'},
-      body: json.encode({'phone': phone, 'password': password}),
+      body: json.encode({'name': name, 'password': password}),
     );
+
     print(response.statusCode);
     if (response.statusCode != 200 && response.statusCode != 201) {
       final decode = json.decode(response.body) as Map<String, dynamic>;

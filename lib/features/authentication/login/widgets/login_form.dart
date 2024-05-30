@@ -9,6 +9,8 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../../../model/auth_model.dart';
 import '../../../../navigation_menu.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class PLoginForm extends StatelessWidget {
   const PLoginForm({super.key});
@@ -24,11 +26,12 @@ class PLoginForm extends StatelessWidget {
         child: Column(children: [
           /// Phone
           TextFormField(
-            controller: controller.phone,
-            onSaved: (value) => user.phone = value ?? '0',
+            controller: controller.name,
+            onSaved: (value) => user.name = value ?? '0',
             validator: (value) => Validator.validatePhone(value),
             decoration: const InputDecoration(
-                prefixIcon: Icon(Iconsax.call), labelText: PTexts.phoneNo),
+                prefixIcon: Icon(Iconsax.user_square),
+                labelText: PTexts.username),
           ),
           const SizedBox(height: PSizes.spaceBtwInputFields),
 
@@ -60,7 +63,8 @@ class PLoginForm extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () => Get.to(() => const NavigationMenu()),
+              onPressed: (){},
+              // () => Get.to(() => const NavigationMenu()),
               child: const Text(PTexts.signIn),
             ),
           ),
@@ -81,11 +85,14 @@ class PLoginForm extends StatelessWidget {
   }
 }
 
-void tryLogin(BuildContext context) {
-  // RestAPI().login(phone: user.phone, password: user.password).then(
-  //       (value) => Navigator.of(context).pushNamedAndRemoveUntil(
-  //         NavigationMenu.route,
-  //         (route) => false,
-  //       ),
-  //     );
+Future<void> tryLogin(BuildContext context) async{
+ var url =
+        Uri.http('gymlink.freemyip.com:8080', 'api/auth/authorize_client');
+    try {
+      var response = await http.post(url, body: {
+        'GymKey': 'eeb42dcb-8e5b-4f21-825a-3fc7ada43445',
+        'id': '123'
+      }); // Just testing token
+      var decodedBody = jsonDecode(response.body) as Map;
+}
 }

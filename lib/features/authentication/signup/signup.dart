@@ -1,11 +1,14 @@
 // import 'package:fitness_tracker_app/helper_functions.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:fitness_tracker_app/features/authentication/login/login_controller.dart';
 import 'package:fitness_tracker_app/utils/const/sizes.dart';
 import 'package:fitness_tracker_app/utils/const/text_strings.dart';
+import 'package:fitness_tracker_app/utils/validation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
+import '../../../../model/auth_model.dart';
 import '../../../navigation_menu.dart';
 import '../../../utils/const/colors.dart';
 import '../../../utils/helper_functions.dart';
@@ -16,6 +19,7 @@ class SignupScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = PHelperFunctions.isDarkMode(context);
+    final controller = Get.put(LoginController());
     String? selectedValue;
 
     return Scaffold(
@@ -40,30 +44,30 @@ class SignupScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     /// First & Last Name
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            expands: false,
-                            decoration: const InputDecoration(
-                              labelText: PTexts.firstName,
-                              prefixIcon: Icon(Iconsax.user),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: PSizes.spaceBtwInputFields),
-                        Expanded(
-                          child: TextFormField(
-                            expands: false,
-                            decoration: const InputDecoration(
-                              labelText: PTexts.lastName,
-                              prefixIcon: Icon(Iconsax.user),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: PSizes.spaceBtwInputFields),
+                    // Row(
+                    //   children: [
+                    //     Expanded(
+                    //       child: TextFormField(
+                    //         expands: false,
+                    //         decoration: const InputDecoration(
+                    //           labelText: PTexts.firstName,
+                    //           prefixIcon: Icon(Iconsax.user),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //     const SizedBox(width: PSizes.spaceBtwInputFields),
+                    //     Expanded(
+                    //       child: TextFormField(
+                    //         expands: false,
+                    //         decoration: const InputDecoration(
+                    //           labelText: PTexts.lastName,
+                    //           prefixIcon: Icon(Iconsax.user),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+                    // const SizedBox(height: PSizes.spaceBtwInputFields),
 
                     /// Username
                     TextFormField(
@@ -178,21 +182,29 @@ class SignupScreen extends StatelessWidget {
                     // const SizedBox(height: PSizes.spaceBtwInputFields),
 
                     /// Phone Number
-                    TextFormField(
-                      decoration: const InputDecoration(
-                        labelText: PTexts.phoneNo,
-                        prefixIcon: Icon(Iconsax.call),
-                      ),
-                    ),
-                    const SizedBox(height: PSizes.spaceBtwInputFields),
+                    // TextFormField(
+                    //   decoration: const InputDecoration(
+                    //     labelText: PTexts.phoneNo,
+                    //     prefixIcon: Icon(Iconsax.call),
+                    //   ),
+                    // ),
+                    // const SizedBox(height: PSizes.spaceBtwInputFields),
 
                     /// Password
                     TextFormField(
-                      obscureText: true,
-                      decoration: const InputDecoration(
+                      onSaved: (value) => user.password = value ?? '0',
+                      validator: (value) => Validator.validateEmptyText(value),
+                      obscureText: controller.hidePassword.value,
+                      decoration: InputDecoration(
                         labelText: PTexts.password,
-                        prefixIcon: Icon(Iconsax.password_check),
-                        suffixIcon: Icon(Iconsax.eye_slash),
+                        prefixIcon: const Icon(Iconsax.password_check),
+                        suffixIcon: IconButton(
+                          onPressed: () => controller.hidePassword.value =
+                              !controller.hidePassword.value,
+                          icon: Icon(controller.hidePassword.value
+                              ? Iconsax.eye_slash
+                              : Iconsax.eye),
+                        ),
                       ),
                     ),
                     const SizedBox(height: PSizes.spaceBtwInputFields),

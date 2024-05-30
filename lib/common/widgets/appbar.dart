@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-import '../../../utils/const/colors.dart';
-import '../../../utils/const/sizes.dart';
-import '../../../utils/helper_functions.dart';
+import '../../utils/const/colors.dart';
+import '../../utils/const/sizes.dart';
+import '../../utils/helper_functions.dart';
 
 class PAppBar extends StatelessWidget implements PreferredSizeWidget {
   const PAppBar({

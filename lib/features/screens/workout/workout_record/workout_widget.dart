@@ -4,25 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
+import '../../../../common/widgets/appbar.dart';
 import '../../../../utils/const/colors.dart';
 import '../../../../utils/const/sizes.dart';
-import '../../profile/appbar.dart';
+import 'workoutres_page.dart';
 
-class CountUpTimerPage extends StatefulWidget {
-  static Future<void> navigatorPush(BuildContext context) async {
-    return Navigator.push<void>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => CountUpTimerPage(),
-      ),
-    );
-  }
+class WorkoutWidget extends StatefulWidget {
+  const WorkoutWidget({Key? key}) : super(key: key);
 
   @override
   _State createState() => _State();
 }
 
-class _State extends State<CountUpTimerPage> {
+class _State extends State<WorkoutWidget> {
   late Stream<StepCount> _stepCountStream;
   late Stream<PedestrianStatus> _pedestrianStatusStream;
   bool recordWorkout = false;
@@ -126,6 +120,20 @@ class _State extends State<CountUpTimerPage> {
     if (!mounted) return;
   }
 
+  String formatTime(int totalMilliseconds) {
+    int hours = totalMilliseconds ~/ 3600000;
+    int minutes = (totalMilliseconds % 3600000) ~/ 60000;
+    int seconds = (totalMilliseconds % 60000) ~/ 1000;
+    int milliseconds = totalMilliseconds % 1000;
+
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    String threeDigits(int n) => n.toString().padLeft(3, '0');
+
+    String formattedTime =
+        '${twoDigits(hours)}:${twoDigits(minutes)}:${twoDigits(seconds)}';
+    return formattedTime;
+  }
+
   void onStart() {
     setState(
       () {
@@ -153,6 +161,18 @@ class _State extends State<CountUpTimerPage> {
     _stopWatchTimer.onStopTimer();
     _stepsPrev = 0;
     _stepsNow = _steps;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => WorkoutResultPage(
+            timer: formatTime(_stopWatchTimer.rawTime.value),
+            steps: _stepsNow,
+            distance: dist,
+            speed: speed,
+            pace: pace,
+            calories: calories),
+      ),
+    );
   }
 
   @override
@@ -165,7 +185,7 @@ class _State extends State<CountUpTimerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const PAppBar(
-        showBackArrow: true,
+        showBackArrow: false,
         title: Text('Тренировка'),
       ),
       body: Scrollbar(
@@ -226,7 +246,7 @@ class _State extends State<CountUpTimerPage> {
                         Row(
                           children: [
                             Text(
-                              recordWorkout ? '$dist' : '0.00',
+                              recordWorkout ? '$dist' : '0.0',
                               style: const TextStyle(
                                   fontSize: 28,
                                   fontFamily: 'Helvetica',
@@ -344,7 +364,7 @@ class _State extends State<CountUpTimerPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          recordWorkout ? '$calories' : '0' + "'" + '00' + '"',
+                          recordWorkout ? '$calories' : '0',
                           style: const TextStyle(
                               fontSize: 28,
                               fontFamily: 'Helvetica',
@@ -363,7 +383,7 @@ class _State extends State<CountUpTimerPage> {
                   ],
                 ),
 
-                const SizedBox(height: PSizes.spaceBtwSections * 2),
+                const SizedBox(height: PSizes.spaceBtwSections * 3),
 
                 /// Button
 

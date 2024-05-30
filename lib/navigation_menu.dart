@@ -1,9 +1,10 @@
-import 'package:fitness_tracker_app/features/screens/profile/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import 'features/screens/home/home.dart';
+import 'features/screens/profile/profile.dart';
+import 'features/screens/workout/workout_list/workout_list.dart';
 import 'utils/const/colors.dart';
 import 'utils/helper_functions.dart';
 
@@ -27,7 +28,8 @@ class NavigationMenu extends StatelessWidget {
               controller.selectedIndex.value = index,
           destinations: const [
             NavigationDestination(icon: Icon(Iconsax.home_2), label: 'Главная'),
-            NavigationDestination(icon: Icon(Iconsax.add), label: ''),
+            NavigationDestination(
+                icon: Icon(Iconsax.weight_1), label: 'Тренировки'),
             NavigationDestination(
                 icon: Icon(Iconsax.user), label: 'Мой профиль'),
           ],
@@ -42,8 +44,9 @@ class NavigationController extends GetxController {
   final Rx<int> selectedIndex = 0.obs;
 
   final screens = [
-    MainPage(),
-    MainPage(),
+    const MainPage(),
+    const WorkoutList(),
+    // MyApp(),
     const ProfileScreen(),
   ];
 }

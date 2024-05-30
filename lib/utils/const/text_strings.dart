@@ -28,6 +28,8 @@ class PTexts {
   static const String loginTitle = "Добро пожаловать";
   static const String logininSubTitle =
       "Укажите номер телефона и пароль, чтобы войти";
+  static const String profileMenuTitle1 = "Учётная запись";
+  static const String profileMenuTitle2 = "Мои данные";
 
   // -- OnBoarding Texts
 
