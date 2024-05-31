@@ -7,24 +7,33 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-import '../../../../model/auth_model.dart';
+import '../../../../model/user_model.dart';
 import '../../../../navigation_menu.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class PLoginForm extends StatelessWidget {
+
+class PLoginForm extends StatefulWidget {
   const PLoginForm({super.key});
+ 
+  @override
+  State<PLoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<PLoginForm> {
+  final controller = Get.put(LoginController());
+
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(LoginController());
-
+    
     return Form(
       key: controller.loginFormKey,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: PSizes.spaceBtwSections),
         child: Column(children: [
-          /// Phone
+          /// Name
           TextFormField(
             controller: controller.name,
             onSaved: (value) => user.name = value ?? '0',
@@ -63,7 +72,7 @@ class PLoginForm extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: (){},
+              onPressed: () => SignIn(controller.name.text, controller.password.text),
               // () => Get.to(() => const NavigationMenu()),
               child: const Text(PTexts.signIn),
             ),
@@ -85,14 +94,46 @@ class PLoginForm extends StatelessWidget {
   }
 }
 
-Future<void> tryLogin(BuildContext context) async{
- var url =
-        Uri.http('gymlink.freemyip.com:8080', 'api/auth/authorize_client');
-    try {
-      var response = await http.post(url, body: {
-        'GymKey': 'eeb42dcb-8e5b-4f21-825a-3fc7ada43445',
-        'id': '123'
-      }); // Just testing token
-      var decodedBody = jsonDecode(response.body) as Map;
-}
-}
+void SignIn(String name, String password) {
+    print(name);
+    print(password);
+    _setToken(name, password);
+  }
+
+
+Future<void> _setToken(name, pass) async {
+      final prefs = await SharedPreferences.getInstance();
+
+      final token = await _getToken(name, pass);
+      if (token != '') {
+        prefs.setString('user', jsonEncode(token));
+        print('Всё ок');
+        Get.to(() => const NavigationMenu());
+      } else {
+        print('Не верно');
+      }
+    }
+    
+    Future<String> _getToken(name , pass) async {
+      var url =
+          Uri.https('utterly-comic-parakeet.ngrok-free.app', 'login');
+        print(url);
+      try {
+        var response = await http.post(url, body: jsonEncode( {
+          'name': name.toString(),
+          'password': pass.toString()
+        }), 
+        headers: {"ngrok-skip-browser-warning":"true", "Content-Type": "application/json", "Accept": "application/json"}); 
+        print(response);
+        print(jsonDecode(response.body));
+        var decodedBody = jsonDecode(response.body) as Map;
+        print(decodedBody);
+        if (decodedBody['success'] == false) {
+          return '';
+        }
+        return decodedBody['id'].toString();
+      } catch (e) {
+        print(e);
+        return '';
+      }
+    }

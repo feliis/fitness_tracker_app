@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-import '../../../../model/auth_model.dart';
+import '../../../model/user_model.dart';
 import '../../../navigation_menu.dart';
 import '../../../utils/const/colors.dart';
 import '../../../utils/helper_functions.dart';
