@@ -2,21 +2,14 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:fitness_tracker_app/features/authentication/login/login_controller.dart';
-import 'package:fitness_tracker_app/utils/const/sizes.dart';
-import 'package:fitness_tracker_app/utils/const/text_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../common/widgets/appbar.dart';
-import '../../../common/widgets/circular_image.dart';
-import '../../../utils/const/colors.dart';
-import '../../../utils/const/image_strings.dart';
 import '../../../utils/helper_functions.dart';
-import 'package:http/http.dart' as http;
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -33,10 +26,19 @@ class ProfileScreen extends StatelessWidget {
         title: Text('Мой профиль'),
       ),
       body: Center(
-        child: FutureBuilder(
+        child: FutureBuilder<Map<String, dynamic>>(
           future: get_user(),
-          builder: (context, snapshot) {
-            return Text(snapshot.data.toString());
+          builder: (BuildContext context,
+              AsyncSnapshot<Map<String, dynamic>> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else if (snapshot.hasData) {
+              return Text('User Name: ${snapshot.data!['name']}');
+            } else {
+              return Text('No data');
+            }
           },
         ),
       ),
@@ -66,7 +68,7 @@ class ProfileScreen extends StatelessWidget {
       //               TextFormField(
       //                 expands: false,
       //                 decoration: const InputDecoration(
-                      
+
       //                   // labelText: PTexts.username,
       //                   prefixIcon: Icon(Iconsax.user_edit),
       //                 ),
@@ -217,36 +219,33 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
+Future<Map<String, dynamic>> get_user() async {
+  final prefs = await SharedPreferences.getInstance();
+  final String id = prefs.get('user').toString();
 
-
-Future<Map<String, String>> get_user() async {
-      final prefs = await SharedPreferences.getInstance();
-      final String id  = prefs.get('user').toString();
-
-
-      print(id.toString());
-      final query = {
-        'id' : '${id.replaceAll(RegExp(r'"'), '')}'
-      };
-      print(query);
-      var url =
-          Uri.https('utterly-comic-parakeet.ngrok-free.app', "profile", query);
-        print(url);
-      try {
-        var response = await http.get(url, 
-        headers: {"ngrok-skip-browser-warning":"true", "Content-Type": "application/json", "Accept": "application/json"}); 
-        print(response);
-        print(jsonDecode(response.body));
-        var decodedBody = jsonDecode(response.body) as Map<String, String>;
-        print(decodedBody);
-        if (decodedBody['success'] == false) {
-          return jsonDecode(response.body);
-        }
-        return decodedBody;
-      } catch (e) {
-        print(e);
-        throw Error();
-      }
+  print(id.toString());
+  final query = {'id': '${id.replaceAll(RegExp(r'"'), '')}'};
+  print(query);
+  var url =
+      Uri.https('utterly-comic-parakeet.ngrok-free.app', "profile", query);
+  print(url);
+  try {
+    var response = await http.get(url, headers: {
+      "ngrok-skip-browser-warning": "true",
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    });
+    print(response);
+    print(jsonDecode(response.body)['name']);
+    var decodedBody = jsonDecode(response.body);
+    // print(decodedBody);
+    print(decodedBody['name']);
+    if (decodedBody['success'] == false) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
     }
-
-
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  } catch (e) {
+    print(e);
+    throw Error();
+  }
+}
