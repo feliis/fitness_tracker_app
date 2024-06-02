@@ -6,6 +6,7 @@ import 'package:fitness_tracker_app/features/authentication/login/login_controll
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../common/widgets/appbar.dart';
@@ -19,6 +20,7 @@ class ProfileScreen extends StatelessWidget {
     final dark = PHelperFunctions.isDarkMode(context);
     final controller = Get.put(LoginController());
     String? selectedValue;
+    String formattedDate = '';
 
     return Scaffold(
       appBar: const PAppBar(
@@ -35,7 +37,26 @@ class ProfileScreen extends StatelessWidget {
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else if (snapshot.hasData) {
-              return Text('User Name: ${snapshot.data!['name']}');
+              String formattedDate = '';
+              if (snapshot.data!['birthday'] != null) {
+                DateFormat inputFormat =
+                    DateFormat('EEE, dd MMM yyyy HH:mm:ss');
+                DateTime parsedDate =
+                    inputFormat.parse(snapshot.data!['birthday']);
+                formattedDate = DateFormat('dd MMMM yyyy').format(parsedDate);
+                print(formattedDate);
+              }
+              return Form(
+                child: Column(
+                  children: [
+                    Text('Имя пользователя: ${snapshot.data!['name']}'),
+                    Text('Дата рождения: $formattedDate'),
+                    Text('Пол: ${snapshot.data!['sex']}'),
+                    Text('Рост: ${snapshot.data!['height']}'),
+                    Text('Вес: ${snapshot.data!['weight']}'),
+                  ],
+                ),
+              );
             } else {
               return Text('No data');
             }

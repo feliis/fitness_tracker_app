@@ -27,8 +27,7 @@ class _State extends State<WorkoutWidget> {
       calories = 0,
       milisecond = 0,
       time = 0;
-  double dist = 0.00, speed = 0.00, weight = 68.5, height = 170.0;
-  String pace = '0' + "'" + '00' + '"';
+  double dist = 0.00, speed = 0.00, weight = 68.5, height = 170.0, pace = 0.00;
   String buttonText = 'Начать';
   Color buttonColor = PColors.primary;
 
@@ -72,16 +71,17 @@ class _State extends State<WorkoutWidget> {
       speed = double.parse(s.toStringAsFixed(2));
       double p = 60 / speed;
 
-      int paceSeconds =
-          ((double.parse(p.toStringAsFixed(2)) - p.floor()) * 60).toInt();
-      int paceMinutes = p.toInt();
-      pace = paceMinutes.toString() + "'" + paceSeconds.toString() + '"';
+      // int paceSeconds =
+      //     ((double.parse(p.toStringAsFixed(2)) - p.floor()) * 60).toInt();
+      // int paceMinutes = p.toInt();
+      pace = p;
 
       double c = (0.035 * weight + (speed / height) * 0.029 * weight) * minutes;
       calories = c.toInt();
       if (speed == double.infinity || pace == double.infinity) {
         speed = 0.00;
-        pace = '0' + "'" + '00' + '"';
+        pace = 0.00;
+        // "0'00" + '"';
       }
     });
   }
@@ -143,7 +143,7 @@ class _State extends State<WorkoutWidget> {
         _steps -= _stepsPrev;
         dist = 0.00;
         speed = 0.00;
-        pace = '0' + "'" + '00' + '"';
+        pace = 0.00;
         calories = 0;
         if (buttonText == "Начать") {
           buttonText = "Завершить";
@@ -173,6 +173,7 @@ class _State extends State<WorkoutWidget> {
             calories: calories),
       ),
     );
+    print('temp: $pace');
   }
 
   @override
@@ -329,7 +330,7 @@ class _State extends State<WorkoutWidget> {
                         Row(
                           children: [
                             Text(
-                              recordWorkout ? pace : '--',
+                              recordWorkout ? '$pace' : '--',
                               style: const TextStyle(
                                   fontSize: 28,
                                   fontFamily: 'Helvetica',

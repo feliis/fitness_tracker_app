@@ -1,0 +1,14 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+class SignupController extends GetxController {
+  /// Variables
+  final hidePassword = true.obs;
+  final name = TextEditingController();
+  final birthday = TextEditingController();
+  final sex = TextEditingController();
+  final height = TextEditingController();
+  final weight = TextEditingController();
+  final password = TextEditingController();
+  GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
+}

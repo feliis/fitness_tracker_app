@@ -27,6 +27,14 @@ class PHelperFunctions {
     }
   }
 
+  static String getPace(double p) {
+    int paceSeconds =
+        ((double.parse(p.toStringAsFixed(2)) - p.floor()) * 60).toInt();
+    int paceMinutes = p.toInt();
+    String pace = paceMinutes.toString() + "'" + paceSeconds.toString() + '"';
+    return pace;
+  }
+
   static void navigateToScreen(BuildContext context, Widget screen) {
     Navigator.push(
       context,

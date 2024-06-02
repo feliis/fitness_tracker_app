@@ -1,18 +1,23 @@
+import 'dart:convert';
+
 import 'package:fitness_tracker_app/common/widgets/curved_edges.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../common/widgets/circular_container.dart';
 import '../../../../navigation_menu.dart';
 import '../../../../utils/const/colors.dart';
 import '../../../../utils/const/sizes.dart';
+import '../../../../utils/helper_functions.dart';
 
 class WorkoutResultPage extends StatelessWidget {
   final String timer;
   final int steps;
   final double distance;
   final double speed;
-  final String pace;
+  final double pace;
   final int calories;
 
   const WorkoutResultPage({
@@ -247,7 +252,7 @@ class WorkoutResultPage extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                pace,
+                                PHelperFunctions.getPace(pace),
                                 style: const TextStyle(
                                     fontSize: 22,
                                     fontFamily: 'Helvetica',
@@ -311,7 +316,8 @@ class WorkoutResultPage extends StatelessWidget {
                       SizedBox(
                         width: 250,
                         child: ElevatedButton(
-                          onPressed: () => Get.to(() => const NavigationMenu()),
+                          onPressed: () => createWorkout(
+                              steps, distance, speed, pace, calories, timer),
                           style: ElevatedButton.styleFrom(
                             side: const BorderSide(
                                 color: Color.fromARGB(0, 0, 0, 0)),
@@ -332,201 +338,54 @@ class WorkoutResultPage extends StatelessWidget {
   }
 }
 
+// Future<void> set_workout(name, pass) async {
+//   //   final token = await _getToken(name, pass);
+//   //   if (token != '') {
+//   //     prefs.setString('user', jsonEncode(token));
+//   //     print('Всё ок');
+//   //     Get.to(() => const NavigationMenu());
+//   //   } else {
+//   //     print('Не верно');
+//   //   }
+//   // }
 
-  // child: Padding(
-  //           padding: const EdgeInsets.symmetric(
-  //             vertical: 32,
-  //             horizontal: 16,
-  //           ),
-  //           child: Column(
-  //             mainAxisAlignment: MainAxisAlignment.center,
-  //             crossAxisAlignment: CrossAxisAlignment.center,
-  //             children: <Widget>[
-  //               const SizedBox(height: PSizes.spaceBtwSections),
+Future<String> createWorkout(
+    steps, distance, speed, pace, calories, timer) async {
+  final prefs = await SharedPreferences.getInstance();
+  final String id = prefs.get('user').toString();
 
-  //               /// Timer
-  //               Row(
-  //                 mainAxisAlignment: MainAxisAlignment.center,
-  //                 children: [
-  //                   Text(
-  //                     timer,
-  //                     style: const TextStyle(
-  //                         fontSize: 28,
-  //                         fontFamily: 'Helvetica',
-  //                         fontWeight: FontWeight.bold),
-  //                   ),
-  //                 ],
-  //               ),
+  print(id.toString());
+  var url =
+      Uri.https('utterly-comic-parakeet.ngrok-free.app', "create_workout");
+  print(url);
+  try {
+    var response = await http.post(url,
+        body: jsonEncode({
+          'user_id': '${id.replaceAll(RegExp(r'"'), '')}',
+          'steps': steps.toString(),
+          'distance': distance.toString(),
+          'speed': speed.toString(),
+          'pace': pace.toString(),
+          'calories': calories.toString(),
+          'duration': timer.toString(),
+        }),
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        });
+    print(response);
 
-  //               const SizedBox(height: PSizes.spaceBtwInputFields * 2),
-
-  //               /// Distance & Steps
-  //               Row(
-  //                 mainAxisAlignment: MainAxisAlignment.center,
-  //                 children: [
-  //                   Column(
-  //                     mainAxisAlignment: MainAxisAlignment.center,
-  //                     children: <Widget>[
-  //                       Text(
-  //                         'Расстояние',
-  //                         style: TextStyle(fontSize: 18),
-  //                       ),
-  //                       Row(
-  //                         children: [
-  //                           Text(
-  //                             '$distance',
-  //                             style: const TextStyle(
-  //                                 fontSize: 28,
-  //                                 fontFamily: 'Helvetica',
-  //                                 fontWeight: FontWeight.bold),
-  //                           ),
-  //                           const SizedBox(width: PSizes.spaceBtwInputFields),
-  //                           Text(
-  //                             'км',
-  //                             style: const TextStyle(
-  //                                 fontSize: 22,
-  //                                 fontFamily: 'Helvetica',
-  //                                 fontWeight: FontWeight.normal),
-  //                           ),
-  //                         ],
-  //                       ),
-  //                     ],
-  //                   ),
-  //                   const SizedBox(width: PSizes.spaceBtwInputFields * 3),
-  //                   Column(
-  //                     mainAxisAlignment: MainAxisAlignment.center,
-  //                     children: <Widget>[
-  //                       Text(
-  //                         'Шаги',
-  //                         style: TextStyle(fontSize: 18),
-  //                       ),
-  //                       Text(
-  //                         '$steps',
-  //                         style: const TextStyle(
-  //                             fontSize: 28,
-  //                             fontFamily: 'Helvetica',
-  //                             fontWeight: FontWeight.bold),
-  //                       ),
-  //                     ],
-  //                   ),
-  //                 ],
-  //               ),
-
-  //               const SizedBox(height: PSizes.spaceBtwInputFields * 2),
-
-  //               /// Speed and pace
-  //               Row(
-  //                 mainAxisAlignment: MainAxisAlignment.center,
-  //                 children: [
-  //                   Column(
-  //                     mainAxisAlignment: MainAxisAlignment.center,
-  //                     children: [
-  //                       Text(
-  //                         'Скорость',
-  //                         style: TextStyle(fontSize: 18),
-  //                       ),
-  //                       Row(
-  //                         children: [
-  //                           Text(
-  //                             '$speed',
-  //                             style: const TextStyle(
-  //                                 fontSize: 28,
-  //                                 fontFamily: 'Helvetica',
-  //                                 fontWeight: FontWeight.bold),
-  //                           ),
-  //                           const SizedBox(width: PSizes.spaceBtwInputFields),
-  //                           Text(
-  //                             'км/ч',
-  //                             style: const TextStyle(
-  //                                 fontSize: 22,
-  //                                 fontFamily: 'Helvetica',
-  //                                 fontWeight: FontWeight.normal),
-  //                           ),
-  //                         ],
-  //                       ),
-  //                     ],
-  //                   ),
-  //                   const SizedBox(width: PSizes.spaceBtwInputFields * 3),
-  //                   Column(
-  //                     mainAxisAlignment: MainAxisAlignment.center,
-  //                     children: [
-  //                       Text(
-  //                         'Темп',
-  //                         style: TextStyle(fontSize: 18),
-  //                       ),
-  //                       Row(
-  //                         children: [
-  //                           Text(
-  //                             pace,
-  //                             style: const TextStyle(
-  //                                 fontSize: 28,
-  //                                 fontFamily: 'Helvetica',
-  //                                 fontWeight: FontWeight.bold),
-  //                           ),
-  //                           const SizedBox(width: PSizes.spaceBtwInputFields),
-  //                           Text(
-  //                             '/км',
-  //                             style: const TextStyle(
-  //                                 fontSize: 22,
-  //                                 fontFamily: 'Helvetica',
-  //                                 fontWeight: FontWeight.normal),
-  //                           ),
-  //                         ],
-  //                       ),
-  //                     ],
-  //                   ),
-  //                 ],
-  //               ),
-
-  //               const SizedBox(height: PSizes.spaceBtwInputFields * 2),
-
-  //               /// Calories
-  //               Column(
-  //                 mainAxisAlignment: MainAxisAlignment.center,
-  //                 children: [
-  //                   Text(
-  //                     'Калории',
-  //                     style: TextStyle(fontSize: 18),
-  //                   ),
-  //                   Row(
-  //                     mainAxisAlignment: MainAxisAlignment.center,
-  //                     children: [
-  //                       Text(
-  //                         '$calories',
-  //                         style: const TextStyle(
-  //                             fontSize: 28,
-  //                             fontFamily: 'Helvetica',
-  //                             fontWeight: FontWeight.bold),
-  //                       ),
-  //                       const SizedBox(width: PSizes.spaceBtwInputFields),
-  //                       Text(
-  //                         'ккал',
-  //                         style: const TextStyle(
-  //                             fontSize: 22,
-  //                             fontFamily: 'Helvetica',
-  //                             fontWeight: FontWeight.normal),
-  //                       ),
-  //                     ],
-  //                   ),
-  //                 ],
-  //               ),
-
-  //               const SizedBox(height: PSizes.spaceBtwSections * 3),
-
-  //               /// Button
-
-  //               SizedBox(
-  //                 width: 250,
-  //                 child: ElevatedButton(
-  //                   onPressed: () {},
-  //                   child: const Text('Завершено'),
-  //                   style: ElevatedButton.styleFrom(
-  //                     side: const BorderSide(color: Color.fromARGB(0, 0, 0, 0)),
-  //                     backgroundColor: PColors.error,
-  //                   ),
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-        
+    print(jsonDecode(response.body));
+    var decodedBody = jsonDecode(response.body) as Map;
+    print(decodedBody);
+    if (decodedBody['success'] == false) {
+      return '';
+    }
+    Get.to(() => const NavigationMenu());
+    return decodedBody['id'].toString();
+  } catch (e) {
+    print(e);
+    return '';
+  }
+}
