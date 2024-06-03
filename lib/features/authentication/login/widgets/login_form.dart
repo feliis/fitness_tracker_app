@@ -78,7 +78,7 @@ class _LoginFormState extends State<PLoginForm> {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
-              onPressed: () => Get.to(() => const SignupScreen()),
+              onPressed: () => Get.to(() => SignupScreen()),
               child: const Text(PTexts.createAccount),
             ),
           ),

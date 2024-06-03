@@ -5,8 +5,10 @@ class SignupController extends GetxController {
   /// Variables
   final hidePassword = true.obs;
   final name = TextEditingController();
-  final birthday = TextEditingController();
+  final lastname = TextEditingController();
+  final username = TextEditingController();
   final sex = TextEditingController();
+  final birthday = TextEditingController();
   final height = TextEditingController();
   final weight = TextEditingController();
   final password = TextEditingController();

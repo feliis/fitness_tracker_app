@@ -5,8 +5,10 @@ import 'package:fitness_tracker_app/utils/const/sizes.dart';
 import 'package:fitness_tracker_app/utils/const/text_strings.dart';
 import 'package:fitness_tracker_app/utils/validation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+
 
 import '../../../model/user_model.dart';
 import '../../../navigation_menu.dart';
@@ -14,22 +16,57 @@ import '../../../utils/const/colors.dart';
 import '../../../utils/helper_functions.dart';
 import 'signup_controller.dart';
 
-class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
 
+class SignupScreen extends StatelessWidget {
+  
   @override
-  State<SignupScreen> createState() => _SignupState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      // Добавьте поддерживаемые локали
+      supportedLocales: [
+        Locale('en', 'US'),
+        Locale('ru', 'RU'),
+      ],
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      // Укажите локаль по умолчанию
+      locale: Locale('ru', 'RU'),
+      home: Signup(),
+    );
+  }
 }
 
-class _SignupState extends State<SignupScreen> {
-  TextEditingController _dateController = TextEditingController();
+
+
+class Signup extends StatefulWidget {
+  const Signup({super.key});
+  
+  @override
+  State<Signup> createState() => _SignupState();
+}
+
+class _SignupState extends State<Signup> {
   final controller = Get.put(SignupController());
+  late Sex selectedSex;
+  List<Sex> sex = <Sex>[const Sex(true,'Мужской'), const Sex(false,'Женский')];
+
+    @override
+  void initState() {
+     selectedSex = sex[0];
+  }
 
   @override
   Widget build(BuildContext context) {
     final dark = PHelperFunctions.isDarkMode(context);
-    final controller = Get.put(LoginController());
-    String? selectedValue;
+    final controller = Get.put(SignupController());
+
+    
+
+    
 
     return Scaffold(
       appBar: AppBar(
@@ -57,6 +94,7 @@ class _SignupState extends State<SignupScreen> {
                       children: [
                         Expanded(
                           child: TextFormField(
+                            controller: controller.name,
                             expands: false,
                             decoration: const InputDecoration(
                               labelText: PTexts.firstName,
@@ -67,6 +105,7 @@ class _SignupState extends State<SignupScreen> {
                         const SizedBox(width: PSizes.spaceBtwInputFields),
                         Expanded(
                           child: TextFormField(
+                            controller: controller.lastname,
                             expands: false,
                             decoration: const InputDecoration(
                               labelText: PTexts.lastName,
@@ -80,6 +119,7 @@ class _SignupState extends State<SignupScreen> {
 
                     /// Username
                     TextFormField(
+                      controller: controller.username,
                       expands: false,
                       decoration: const InputDecoration(
                         labelText: PTexts.username,
@@ -89,7 +129,8 @@ class _SignupState extends State<SignupScreen> {
                     const SizedBox(height: PSizes.spaceBtwInputFields),
 
                     /// Gender
-                    DropdownButtonFormField2<String>(
+                    DropdownButtonFormField2<Sex>(
+                      value: selectedSex,
                       isExpanded: true,
                       decoration: InputDecoration(
                         labelText: PTexts.gender,
@@ -99,29 +140,30 @@ class _SignupState extends State<SignupScreen> {
                           borderRadius: BorderRadius.circular(15),
                         ),
                       ),
-                      items: PTexts.genderItems
-                          .map((item) => DropdownMenuItem<String>(
-                                value: item,
-                                child: Text(
-                                  item,
-                                  style: const TextStyle(
-                                    fontSize: PSizes.fontSm,
-                                  ),
-                                ),
-                              ))
-                          .toList(),
+                      items: sex.map((Sex s) {
+                        return new DropdownMenuItem<Sex>(
+                          value: s,
+                          child: Text(
+                            s.name,
+                            style: const TextStyle(
+                              fontSize: PSizes.fontSm,
+                            ),
+                          ));
+                      }).toList(),
+
+                      onChanged: (Sex? newValue) {
+                        setState(() {
+                          selectedSex = newValue!;
+                        });
+                      },
+                
                       // validator: (value) {
                       //   if (value == null) {
                       //     return 'Please select gender.';
                       //   }
                       //   return null;
                       // },
-                      onChanged: (value) {
-                        //Do something when selected item is changed.
-                      },
-                      onSaved: (value) {
-                        selectedValue = value.toString();
-                      },
+                      
                       buttonStyleData: const ButtonStyleData(
                         padding: EdgeInsets.only(right: 8),
                       ),
@@ -147,10 +189,7 @@ class _SignupState extends State<SignupScreen> {
 
                     /// Date of Birth
                     TextFormField(
-                        // expands: false,
-                        // inputFormatters: [maskFormatter],
-                        // keyboardType: TextInputType.number,
-                        controller: _dateController,
+                        controller: controller.birthday,
                         decoration: const InputDecoration(
                           labelText: PTexts.dateOfBirth,
                           prefixIcon: Icon(Iconsax.calendar_1),
@@ -169,6 +208,7 @@ class _SignupState extends State<SignupScreen> {
                       children: [
                         Expanded(
                           child: TextFormField(
+                            controller: controller.height,
                             expands: false,
                             inputFormatters: [maskFormatter],
                             keyboardType: TextInputType.number,
@@ -181,6 +221,7 @@ class _SignupState extends State<SignupScreen> {
                         const SizedBox(width: PSizes.spaceBtwInputFields),
                         Expanded(
                           child: TextFormField(
+                            controller: controller.weight,
                             expands: false,
                             inputFormatters: [maskFormatter],
                             keyboardType: TextInputType.number,
@@ -206,7 +247,7 @@ class _SignupState extends State<SignupScreen> {
 
                     /// Password
                     TextFormField(
-                      onSaved: (value) => user.password = value ?? '0',
+                      controller: controller.password,
                       validator: (value) => Validator.validateEmptyText(value),
                       obscureText: controller.hidePassword.value,
                       decoration: InputDecoration(
@@ -230,7 +271,7 @@ class _SignupState extends State<SignupScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () => Get.to(() => const NavigationMenu()),
+                        onPressed: () => print(selectedSex.content.toString()),
                         child: const Text(PTexts.createAccount),
                       ),
                     ),
@@ -250,12 +291,36 @@ class _SignupState extends State<SignupScreen> {
       initialDate: DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
+      locale: const Locale('ru', 'RU'),
+      builder: (BuildContext context, Widget? child) { // Change Widget to Widget?
+        return Theme(
+          data: ThemeData.dark().copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: PColors.primary,
+              onPrimary: Colors.white,
+              surface: PColors.white,
+              onSurface: PColors.black,
+            ),
+            dialogBackgroundColor: Colors.blue[900],
+          ),
+          child: child ?? Container(), // Handle the case where child is null
+        );
+      },
     );
+  
 
     if (_picked != null) {
       setState(() {
-        _dateController.text = _picked.toString().split(" ")[0];
+        controller.birthday.text = _picked.toString().split(" ")[0];
       });
     }
   }
+}
+
+
+class Sex {
+  const Sex(this.content,this.name);
+
+  final bool content;
+  final String name;
 }
