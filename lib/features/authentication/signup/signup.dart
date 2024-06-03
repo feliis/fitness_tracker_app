@@ -64,10 +64,6 @@ class _SignupState extends State<Signup> {
     final dark = PHelperFunctions.isDarkMode(context);
     final controller = Get.put(SignupController());
 
-    
-
-    
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: dark ? Colors.black : Colors.white,
