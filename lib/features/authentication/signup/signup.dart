@@ -12,9 +12,18 @@ import '../../../model/user_model.dart';
 import '../../../navigation_menu.dart';
 import '../../../utils/const/colors.dart';
 import '../../../utils/helper_functions.dart';
+import 'signup_controller.dart';
 
-class SignupScreen extends StatelessWidget {
+class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
+
+  @override
+  State<SignupScreen> createState() => _SignupState();
+}
+
+class _SignupState extends State<SignupScreen> {
+  TextEditingController _dateController = TextEditingController();
+  final controller = Get.put(SignupController());
 
   @override
   Widget build(BuildContext context) {
@@ -44,30 +53,30 @@ class SignupScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     /// First & Last Name
-                    // Row(
-                    //   children: [
-                    //     Expanded(
-                    //       child: TextFormField(
-                    //         expands: false,
-                    //         decoration: const InputDecoration(
-                    //           labelText: PTexts.firstName,
-                    //           prefixIcon: Icon(Iconsax.user),
-                    //         ),
-                    //       ),
-                    //     ),
-                    //     const SizedBox(width: PSizes.spaceBtwInputFields),
-                    //     Expanded(
-                    //       child: TextFormField(
-                    //         expands: false,
-                    //         decoration: const InputDecoration(
-                    //           labelText: PTexts.lastName,
-                    //           prefixIcon: Icon(Iconsax.user),
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
-                    // const SizedBox(height: PSizes.spaceBtwInputFields),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            expands: false,
+                            decoration: const InputDecoration(
+                              labelText: PTexts.firstName,
+                              prefixIcon: Icon(Iconsax.user),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: PSizes.spaceBtwInputFields),
+                        Expanded(
+                          child: TextFormField(
+                            expands: false,
+                            decoration: const InputDecoration(
+                              labelText: PTexts.lastName,
+                              prefixIcon: Icon(Iconsax.user),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: PSizes.spaceBtwInputFields),
 
                     /// Username
                     TextFormField(
@@ -138,48 +147,53 @@ class SignupScreen extends StatelessWidget {
 
                     /// Date of Birth
                     TextFormField(
-                      expands: false,
-                      inputFormatters: [maskFormatter],
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: PTexts.dateOfBirth,
-                        prefixIcon: Icon(Iconsax.calendar_1),
-                        hintText: PTexts.dateOfBirthHint,
-                      ),
-                    ),
+                        // expands: false,
+                        // inputFormatters: [maskFormatter],
+                        // keyboardType: TextInputType.number,
+                        controller: _dateController,
+                        decoration: const InputDecoration(
+                          labelText: PTexts.dateOfBirth,
+                          prefixIcon: Icon(Iconsax.calendar_1),
+                          hintText: PTexts.dateOfBirthHint,
+                          filled: true,
+                        ),
+                        readOnly: true,
+                        onTap: () {
+                          _selectDate();
+                        }),
 
                     const SizedBox(height: PSizes.spaceBtwInputFields),
 
                     /// Height & weight
-                    // Row(
-                    //   children: [
-                    //     Expanded(
-                    //       child: TextFormField(
-                    //         expands: false,
-                    //         inputFormatters: [maskFormatter],
-                    //         keyboardType: TextInputType.number,
-                    //         decoration: const InputDecoration(
-                    //           labelText: PTexts.height,
-                    //           prefixIcon: Icon(Iconsax.ruler),
-                    //         ),
-                    //       ),
-                    //     ),
-                    //     const SizedBox(width: PSizes.spaceBtwInputFields),
-                    //     Expanded(
-                    //       child: TextFormField(
-                    //         expands: false,
-                    //         inputFormatters: [maskFormatter],
-                    //         keyboardType: TextInputType.number,
-                    //         decoration: const InputDecoration(
-                    //           labelText: PTexts.weight,
-                    //           prefixIcon: Icon(Iconsax.weight),
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            expands: false,
+                            inputFormatters: [maskFormatter],
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              labelText: PTexts.height,
+                              prefixIcon: Icon(Iconsax.ruler),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: PSizes.spaceBtwInputFields),
+                        Expanded(
+                          child: TextFormField(
+                            expands: false,
+                            inputFormatters: [maskFormatter],
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              labelText: PTexts.weight,
+                              prefixIcon: Icon(Iconsax.weight),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
 
-                    // const SizedBox(height: PSizes.spaceBtwInputFields),
+                    const SizedBox(height: PSizes.spaceBtwInputFields),
 
                     /// Phone Number
                     // TextFormField(
@@ -207,7 +221,7 @@ class SignupScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(height: PSizes.spaceBtwInputFields),
+                    const SizedBox(height: PSizes.spaceBtwSections),
 
                     /// Terms&Conditions Checkbox
                     ///
@@ -228,5 +242,20 @@ class SignupScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _selectDate() async {
+    DateTime? _picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+
+    if (_picked != null) {
+      setState(() {
+        _dateController.text = _picked.toString().split(" ")[0];
+      });
+    }
   }
 }
