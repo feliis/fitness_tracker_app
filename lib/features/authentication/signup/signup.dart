@@ -193,7 +193,7 @@ class _SignupState extends State<Signup> {
                         decoration: const InputDecoration(
                           labelText: PTexts.dateOfBirth,
                           prefixIcon: Icon(Iconsax.calendar_1),
-                          hintText: PTexts.dateOfBirthHint,
+                          hintText: PTexts.dateOfBirth,
                           filled: true,
                         ),
                         readOnly: true,

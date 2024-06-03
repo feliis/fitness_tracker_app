@@ -14,7 +14,6 @@ class PTexts {
   static const String lastName = "Фамилия";
   static const String gender = "Пол";
   static const String dateOfBirth = "Дата рождения";
-  static const String dateOfBirthHint = "ДД/ММ/ГГГГ";
   static const String height = "Рост, см";
   static const String weight = "Вес, кг";
   static const String phoneNo = "Телефон";
