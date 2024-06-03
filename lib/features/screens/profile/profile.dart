@@ -50,6 +50,8 @@ class ProfileScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     Text('Имя пользователя: ${snapshot.data!['name']}'),
+                    Text('Имя пользователя: ${snapshot.data!['lastname']}'),
+                    Text('Имя пользователя: ${snapshot.data!['username']}'),
                     Text('Дата рождения: $formattedDate'),
                     Text('Пол: ${snapshot.data!['sex']}'),
                     Text('Рост: ${snapshot.data!['height']}'),

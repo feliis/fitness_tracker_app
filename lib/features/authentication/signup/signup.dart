@@ -1,27 +1,27 @@
 // import 'package:fitness_tracker_app/helper_functions.dart';
+import 'dart:convert';
+
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:fitness_tracker_app/features/authentication/login/login_controller.dart';
 import 'package:fitness_tracker_app/utils/const/sizes.dart';
 import 'package:fitness_tracker_app/utils/const/text_strings.dart';
 import 'package:fitness_tracker_app/utils/validation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:iconsax/iconsax.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-
-import '../../../model/user_model.dart';
 import '../../../navigation_menu.dart';
 import '../../../utils/const/colors.dart';
 import '../../../utils/helper_functions.dart';
 import 'signup_controller.dart';
 
-
 class SignupScreen extends StatelessWidget {
-  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
       debugShowCheckedModeBanner: false,
       // Добавьте поддерживаемые локали
       supportedLocales: [
@@ -40,11 +40,9 @@ class SignupScreen extends StatelessWidget {
   }
 }
 
-
-
 class Signup extends StatefulWidget {
   const Signup({super.key});
-  
+
   @override
   State<Signup> createState() => _SignupState();
 }
@@ -52,11 +50,14 @@ class Signup extends StatefulWidget {
 class _SignupState extends State<Signup> {
   final controller = Get.put(SignupController());
   late Sex selectedSex;
-  List<Sex> sex = <Sex>[const Sex(true,'Мужской'), const Sex(false,'Женский')];
+  List<Sex> sex = <Sex>[
+    const Sex(true, 'Мужской'),
+    const Sex(false, 'Женский')
+  ];
 
-    @override
+  @override
   void initState() {
-     selectedSex = sex[0];
+    selectedSex = sex[0];
   }
 
   @override
@@ -138,13 +139,13 @@ class _SignupState extends State<Signup> {
                       ),
                       items: sex.map((Sex s) {
                         return new DropdownMenuItem<Sex>(
-                          value: s,
-                          child: Text(
-                            s.name,
-                            style: const TextStyle(
-                              fontSize: PSizes.fontSm,
-                            ),
-                          ));
+                            value: s,
+                            child: Text(
+                              s.name,
+                              style: const TextStyle(
+                                fontSize: PSizes.fontSm,
+                              ),
+                            ));
                       }).toList(),
 
                       onChanged: (Sex? newValue) {
@@ -152,14 +153,14 @@ class _SignupState extends State<Signup> {
                           selectedSex = newValue!;
                         });
                       },
-                
+
                       // validator: (value) {
                       //   if (value == null) {
                       //     return 'Please select gender.';
                       //   }
                       //   return null;
                       // },
-                      
+
                       buttonStyleData: const ButtonStyleData(
                         padding: EdgeInsets.only(right: 8),
                       ),
@@ -206,7 +207,6 @@ class _SignupState extends State<Signup> {
                           child: TextFormField(
                             controller: controller.height,
                             expands: false,
-                            inputFormatters: [maskFormatter],
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
                               labelText: PTexts.height,
@@ -219,7 +219,6 @@ class _SignupState extends State<Signup> {
                           child: TextFormField(
                             controller: controller.weight,
                             expands: false,
-                            inputFormatters: [maskFormatter],
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
                               labelText: PTexts.weight,
@@ -267,7 +266,15 @@ class _SignupState extends State<Signup> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () => print(selectedSex.content.toString()),
+                        onPressed: () => signUp(
+                            controller.name.text,
+                            controller.lastname.text,
+                            controller.username.text,
+                            selectedSex.content,
+                            controller.birthday.text,
+                            controller.height.text,
+                            controller.weight.text,
+                            controller.password.text),
                         child: const Text(PTexts.createAccount),
                       ),
                     ),
@@ -288,7 +295,8 @@ class _SignupState extends State<Signup> {
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       locale: const Locale('ru', 'RU'),
-      builder: (BuildContext context, Widget? child) { // Change Widget to Widget?
+      builder: (BuildContext context, Widget? child) {
+        // Change Widget to Widget?
         return Theme(
           data: ThemeData.dark().copyWith(
             colorScheme: const ColorScheme.dark(
@@ -303,7 +311,6 @@ class _SignupState extends State<Signup> {
         );
       },
     );
-  
 
     if (_picked != null) {
       setState(() {
@@ -311,11 +318,57 @@ class _SignupState extends State<Signup> {
       });
     }
   }
+
+  void signUp(String name, String lastname, String username, bool sex,
+      String birthday, String height, String weight, String password) {
+    create_user(
+        name, lastname, username, sex, birthday, height, weight, password);
+  }
+
+  Future<String> create_user(
+      name, lastname, username, sex, birthday, height, weight, password) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String id = prefs.get('user').toString();
+
+    print(id.toString());
+    var url = Uri.https('utterly-comic-parakeet.ngrok-free.app', "signup");
+    print(url);
+    try {
+      var response = await http.post(url,
+          body: jsonEncode({
+            'name': name.toString(),
+            'lastname': lastname.toString(),
+            'username': username.toString(),
+            'sex': sex.toString(),
+            'birthday': birthday.toString(),
+            'height': height.toString(),
+            'weight': weight.toString(),
+            'password': password.toString(),
+          }),
+          headers: {
+            "ngrok-skip-browser-warning": "true",
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          });
+      print(response);
+
+      print(jsonDecode(response.body));
+      var decodedBody = jsonDecode(response.body) as Map;
+      print(decodedBody);
+      if (decodedBody['success'] == false) {
+        return '';
+      }
+      Get.to(() => const NavigationMenu());
+      return decodedBody['id'].toString();
+    } catch (e) {
+      print(e);
+      return '';
+    }
+  }
 }
 
-
 class Sex {
-  const Sex(this.content,this.name);
+  const Sex(this.content, this.name);
 
   final bool content;
   final String name;
