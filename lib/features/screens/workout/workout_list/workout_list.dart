@@ -6,13 +6,20 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../utils/const/colors.dart';
+import '../../../../utils/const/sizes.dart';
+
 class WorkoutList extends StatelessWidget {
   const WorkoutList({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: Center (
+        child: Padding(
+          padding: const EdgeInsets.all(PSizes.defaultSpace),
+          child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           ElevatedButton(
             onPressed: () => Get.to(() => const WorkoutWidget()),
@@ -28,38 +35,76 @@ class WorkoutList extends StatelessWidget {
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return Center(child: Text('Нет данных'));
               } else {
-                print('in bilder');
                 List<Map<String, dynamic>> workouts = snapshot.data!;
                 return Expanded(
                     child: ListView.builder(
                   itemCount: workouts.length,
                   itemBuilder: (context, index) {
-                    print('in itembilder');
-                    print(workouts);
-                    print(index);
-                    print(workouts[index]);
                     final workout = workouts[index];
-                    return ListTile(
-                      title: Text('треня ёпта бля'),
-                      subtitle: Text(
-                        'Steps: ${workout['steps']}\n'
-                        'Distance: ${workout['distance']}\n'
-                        'Speed: ${workout['speed']}\n'
-                        'Pace: ${workout['pace']}\n'
-                        'Calories: ${workout['calories']}\n'
-                        'Duration: ${workout['duration']}',
+                    return Column(
+                      children: [
+                    InkWell(
+                      onTap: () {},
+                      child: Container(
+                        color: PColors.lightGrey,
+                        width: double.infinity,
+                        height: 70,
+                        child: Center(
+                            child: Row(children: [
+                              /// Иконка 
+                              const Icon(Icons.directions_walk,
+                              size: 40),
+
+                              Column(
+                                children: [
+                                  /// Тип тренировки
+                                  const Text(
+                                  'Ходьба',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.normal),
+                                  ),
+                                  const SizedBox(height: PSizes.spaceBtwItems/2),
+                                  /// Дистанция
+                                  Row(children: [
+                                    Text(
+                                    '${workout['distance']}',
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        fontFamily: 'Helvetica',
+                                        fontWeight: FontWeight.bold),
+                                    ),
+                                  
+                                
+                                  const SizedBox(width: PSizes.spaceBtwItems/2),
+                                  const Text(
+                                    'км',
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontFamily: 'Helvetica',
+                                        fontWeight: FontWeight.normal),
+                                  ),
+                                ])
+                                ],
+                              )],
+                              ),
+                        ),
+                        
                       ),
-                    );
+                    ),
+                    ]);         
                   },
-                ));
-              }
-            },
+                 ),
+                 );
+            }},
           ),
         ],
       ),
+      ),
+    ),
     );
   }
-}
 
 Future<List<Map<String, dynamic>>> get_workout() async {
   final prefs = await SharedPreferences.getInstance();
@@ -88,5 +133,6 @@ Future<List<Map<String, dynamic>>> get_workout() async {
     return data.map((item) => item as Map<String, dynamic>).toList();
   } else {
     throw Exception('Failed to load workouts');
+  }
   }
 }

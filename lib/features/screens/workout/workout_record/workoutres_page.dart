@@ -338,18 +338,7 @@ class WorkoutResultPage extends StatelessWidget {
   }
 }
 
-// Future<void> set_workout(name, pass) async {
-//   //   final token = await _getToken(name, pass);
-//   //   if (token != '') {
-//   //     prefs.setString('user', jsonEncode(token));
-//   //     print('Всё ок');
-//   //     Get.to(() => const NavigationMenu());
-//   //   } else {
-//   //     print('Не верно');
-//   //   }
-//   // }
-
-Future<String> createWorkout(
+Future createWorkout(
     steps, distance, speed, pace, calories, timer) async {
   final prefs = await SharedPreferences.getInstance();
   final String id = prefs.get('user').toString();
@@ -376,14 +365,9 @@ Future<String> createWorkout(
         });
     print(response);
 
-    print(jsonDecode(response.body));
-    var decodedBody = jsonDecode(response.body) as Map;
-    print(decodedBody);
-    if (decodedBody['success'] == false) {
-      return '';
-    }
+   
     Get.to(() => const NavigationMenu());
-    return decodedBody['id'].toString();
+
   } catch (e) {
     print(e);
     return '';

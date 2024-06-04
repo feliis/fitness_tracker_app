@@ -1,6 +1,7 @@
 import 'package:fitness_tracker_app/utils/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'features/authentication/onboarding/onboarding.dart';
 
@@ -15,6 +16,17 @@ class App extends StatelessWidget {
         themeMode: ThemeMode.system,
         theme: PAppTheme.lightTheme,
         darkTheme: PAppTheme.darkTheme,
-        home: const OnBoardingScreen());
+        supportedLocales: const [
+        Locale('en', 'US'),
+        Locale('ru', 'RU'),
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      // Укажите локаль по умолчанию
+      locale: const Locale('ru', 'RU'),
+      home: const OnBoardingScreen());
   }
 }

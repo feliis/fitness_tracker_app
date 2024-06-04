@@ -17,37 +17,16 @@ import '../../../utils/const/colors.dart';
 import '../../../utils/helper_functions.dart';
 import 'signup_controller.dart';
 
-class SignupScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      debugShowCheckedModeBanner: false,
-      // Добавьте поддерживаемые локали
-      supportedLocales: [
-        Locale('en', 'US'),
-        Locale('ru', 'RU'),
-      ],
-      localizationsDelegates: [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      // Укажите локаль по умолчанию
-      locale: Locale('ru', 'RU'),
-      home: Signup(),
-    );
-  }
-}
 
-class Signup extends StatefulWidget {
-  const Signup({super.key});
+
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
 
   @override
-  State<Signup> createState() => _SignupState();
+  State<SignupScreen> createState() => _SignupState();
 }
 
-class _SignupState extends State<Signup> {
+class _SignupState extends State<SignupScreen> {
   final controller = Get.put(SignupController());
   late Sex selectedSex;
   List<Sex> sex = <Sex>[
@@ -57,6 +36,7 @@ class _SignupState extends State<Signup> {
 
   @override
   void initState() {
+    super.initState();
     selectedSex = sex[0];
   }
 
@@ -266,7 +246,7 @@ class _SignupState extends State<Signup> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () => signUp(
+                        onPressed: () => createUser(
                             controller.name.text,
                             controller.lastname.text,
                             controller.username.text,
@@ -319,18 +299,11 @@ class _SignupState extends State<Signup> {
     }
   }
 
-  void signUp(String name, String lastname, String username, bool sex,
-      String birthday, String height, String weight, String password) {
-    create_user(
-        name, lastname, username, sex, birthday, height, weight, password);
-  }
 
-  Future<String> create_user(
-      name, lastname, username, sex, birthday, height, weight, password) async {
-    final prefs = await SharedPreferences.getInstance();
-    final String id = prefs.get('user').toString();
 
-    print(id.toString());
+  Future<String> createUser(name, lastname, username, sex, birthday, height, weight, password) async {
+
+  
     var url = Uri.https('utterly-comic-parakeet.ngrok-free.app', "signup");
     print(url);
     try {
@@ -358,6 +331,8 @@ class _SignupState extends State<Signup> {
       if (decodedBody['success'] == false) {
         return '';
       }
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString('user', jsonEncode(decodedBody['id']));
       Get.to(() => const NavigationMenu());
       return decodedBody['id'].toString();
     } catch (e) {

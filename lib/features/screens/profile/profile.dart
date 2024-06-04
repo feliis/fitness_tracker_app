@@ -20,7 +20,7 @@ class ProfileScreen extends StatelessWidget {
     final dark = PHelperFunctions.isDarkMode(context);
     final controller = Get.put(LoginController());
     String? selectedValue;
-    String formattedDate = '';
+    DateTime formattedDate;
 
     return Scaffold(
       appBar: const PAppBar(
@@ -38,9 +38,12 @@ class ProfileScreen extends StatelessWidget {
               return Text('Error: ${snapshot.error}');
             } else if (snapshot.hasData) {
               String formattedDate = '';
+              
               if (snapshot.data!['birthday'] != null) {
+                
                 DateFormat inputFormat =
                     DateFormat('EEE, dd MMM yyyy HH:mm:ss');
+                    
                 DateTime parsedDate =
                     inputFormat.parse(snapshot.data!['birthday']);
                 formattedDate = DateFormat('dd MMMM yyyy').format(parsedDate);
@@ -48,6 +51,7 @@ class ProfileScreen extends StatelessWidget {
               }
               return Form(
                 child: Column(
+                  
                   children: [
                     Text('Имя пользователя: ${snapshot.data!['name']}'),
                     Text('Имя пользователя: ${snapshot.data!['lastname']}'),
