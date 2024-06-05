@@ -29,7 +29,7 @@ class _State extends State<WorkoutWidget> {
       time = 0;
   double dist = 0.00, speed = 0.00, weight = 68.5, height = 170.0, pace = 0.00;
   late DateTime date_start, date_stop;
-  String buttonText = 'Начать';
+  String buttonText = 'Начать', avg_pace = '0' + "'00" + '"';
   Color buttonColor = PColors.primary;
 
   final _isHours = true;
@@ -76,6 +76,10 @@ class _State extends State<WorkoutWidget> {
       //     ((double.parse(p.toStringAsFixed(2)) - p.floor()) * 60).toInt();
       // int paceMinutes = p.toInt();
       pace = p;
+      int paceSeconds =
+          ((double.parse(p.toStringAsFixed(2)) - p.floor()) * 60).toInt();
+      int paceMinutes = p.toInt();
+      avg_pace = paceMinutes.toString() + "'" + paceSeconds.toString() + '"';
 
       double c = (0.035 * weight + (speed / height) * 0.029 * weight) * minutes;
       calories = c.toInt();
@@ -125,7 +129,6 @@ class _State extends State<WorkoutWidget> {
     int hours = totalMilliseconds ~/ 3600000;
     int minutes = (totalMilliseconds % 3600000) ~/ 60000;
     int seconds = (totalMilliseconds % 60000) ~/ 1000;
-    int milliseconds = totalMilliseconds % 1000;
 
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     String threeDigits(int n) => n.toString().padLeft(3, '0');
@@ -168,14 +171,15 @@ class _State extends State<WorkoutWidget> {
       context,
       MaterialPageRoute(
         builder: (context) => WorkoutResultPage(
-            timer: formatTime(_stopWatchTimer.rawTime.value),
-            steps: _stepsNow,
-            distance: dist,
-            speed: speed,
-            pace: pace,
-            calories: calories,
-            date_start: date_start,
-            date_stop: date_stop,),
+          timer: formatTime(_stopWatchTimer.rawTime.value),
+          steps: _stepsNow,
+          distance: dist,
+          speed: speed,
+          pace: pace,
+          calories: calories,
+          date_start: date_start,
+          date_stop: date_stop,
+        ),
       ),
     );
     print('temp: $pace');
@@ -335,7 +339,7 @@ class _State extends State<WorkoutWidget> {
                         Row(
                           children: [
                             Text(
-                              recordWorkout ? '$pace' : '--',
+                              recordWorkout ? avg_pace : '--',
                               style: const TextStyle(
                                   fontSize: 28,
                                   fontFamily: 'Helvetica',

@@ -12,6 +12,8 @@ import '../../../../utils/const/colors.dart';
 import '../../../../utils/const/sizes.dart';
 import '../../../../utils/helper_functions.dart';
 
+bool _isButtonClicked = false;
+
 class WorkoutResultPage extends StatelessWidget {
   final String timer;
   final int steps;
@@ -20,7 +22,7 @@ class WorkoutResultPage extends StatelessWidget {
   final double pace;
   final int calories;
   final DateTime date_start;
-   final DateTime date_stop;
+  final DateTime date_stop;
 
   const WorkoutResultPage({
     Key? key,
@@ -320,8 +322,8 @@ class WorkoutResultPage extends StatelessWidget {
                       SizedBox(
                         width: 250,
                         child: ElevatedButton(
-                          onPressed: () => createWorkout(
-                              steps, distance, speed, pace, calories, timer, date_start, date_stop),
+                          onPressed: () => createWorkout(steps, distance, speed,
+                              pace, calories, timer, date_start, date_stop),
                           style: ElevatedButton.styleFrom(
                             side: const BorderSide(
                                 color: Color.fromARGB(0, 0, 0, 0)),
@@ -342,10 +344,12 @@ class WorkoutResultPage extends StatelessWidget {
   }
 }
 
-Future createWorkout(
-    steps, distance, speed, pace, calories, timer, date_start, date_stop) async {
+Future createWorkout(steps, distance, speed, pace, calories, timer, date_start,
+    date_stop) async {
   final prefs = await SharedPreferences.getInstance();
   final String id = prefs.get('user').toString();
+
+  Get.to(() => const NavigationMenu());
 
   print(id.toString());
   var url =
@@ -371,9 +375,7 @@ Future createWorkout(
         });
     print(response);
 
-   
-    Get.to(() => const NavigationMenu());
-
+    _isButtonClicked = true;
   } catch (e) {
     print(e);
     return '';
