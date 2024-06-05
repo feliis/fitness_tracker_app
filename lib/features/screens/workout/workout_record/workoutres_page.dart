@@ -19,6 +19,8 @@ class WorkoutResultPage extends StatelessWidget {
   final double speed;
   final double pace;
   final int calories;
+  final DateTime date_start;
+   final DateTime date_stop;
 
   const WorkoutResultPage({
     Key? key,
@@ -28,6 +30,8 @@ class WorkoutResultPage extends StatelessWidget {
     required this.speed,
     required this.pace,
     required this.calories,
+    required this.date_start,
+    required this.date_stop,
   }) : super(key: key);
 
   @override
@@ -317,7 +321,7 @@ class WorkoutResultPage extends StatelessWidget {
                         width: 250,
                         child: ElevatedButton(
                           onPressed: () => createWorkout(
-                              steps, distance, speed, pace, calories, timer),
+                              steps, distance, speed, pace, calories, timer, date_start, date_stop),
                           style: ElevatedButton.styleFrom(
                             side: const BorderSide(
                                 color: Color.fromARGB(0, 0, 0, 0)),
@@ -339,7 +343,7 @@ class WorkoutResultPage extends StatelessWidget {
 }
 
 Future createWorkout(
-    steps, distance, speed, pace, calories, timer) async {
+    steps, distance, speed, pace, calories, timer, date_start, date_stop) async {
   final prefs = await SharedPreferences.getInstance();
   final String id = prefs.get('user').toString();
 
@@ -357,6 +361,8 @@ Future createWorkout(
           'pace': pace.toString(),
           'calories': calories.toString(),
           'duration': timer.toString(),
+          'date_start': date_start.toString(),
+          'date_stop': date_stop.toString(),
         }),
         headers: {
           "ngrok-skip-browser-warning": "true",

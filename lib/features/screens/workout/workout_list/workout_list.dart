@@ -4,6 +4,7 @@ import 'package:fitness_tracker_app/features/screens/workout/workout_record/work
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../utils/const/colors.dart';
@@ -19,14 +20,13 @@ class WorkoutList extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(PSizes.defaultSpace),
           child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           ElevatedButton(
             onPressed: () => Get.to(() => const WorkoutWidget()),
             child: const Text('+'),
           ),
           FutureBuilder<List<Map<String, dynamic>>>(
-            future: get_workout(),
+            future: get_workouts(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(child: CircularProgressIndicator());
@@ -36,32 +36,43 @@ class WorkoutList extends StatelessWidget {
                 return Center(child: Text('Нет данных'));
               } else {
                 List<Map<String, dynamic>> workouts = snapshot.data!;
+                
                 return Expanded(
                     child: ListView.builder(
                   itemCount: workouts.length,
                   itemBuilder: (context, index) {
                     final workout = workouts[index];
+                    String start = '${workout['date_start']}';
+                    DateTime dateTime = DateTime.parse(start);
+                    String dateStart = DateFormat('HH:mm').format(dateTime);
+
+
                     return Column(
                       children: [
                     InkWell(
-                      onTap: () {},
+                      onTap: () => get_workout_info('${workout['id']}'),
                       child: Container(
-                        color: PColors.lightGrey,
+                        decoration: BoxDecoration(
+                          color: PColors.lightGrey,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        
                         width: double.infinity,
-                        height: 70,
-                        child: Center(
-                            child: Row(children: [
+                        height: 85,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(PSizes.md, PSizes.md, PSizes.md, PSizes.md),
+                          child:  Row(children: [
                               /// Иконка 
                               const Icon(Icons.directions_walk,
-                              size: 40),
-
+                              size: 30),
+                              const SizedBox(width: PSizes.spaceBtwItems),
                               Column(
                                 children: [
                                   /// Тип тренировки
                                   const Text(
                                   'Ходьба',
                                   style: TextStyle(
-                                    fontSize: 18,
+                                    fontSize: 14,
                                     fontFamily: 'Poppins',
                                     fontWeight: FontWeight.normal),
                                   ),
@@ -71,34 +82,59 @@ class WorkoutList extends StatelessWidget {
                                     Text(
                                     '${workout['distance']}',
                                     style: const TextStyle(
-                                        fontSize: 18,
+                                        fontSize: 14,
                                         fontFamily: 'Helvetica',
                                         fontWeight: FontWeight.bold),
                                     ),
                                   
                                 
-                                  const SizedBox(width: PSizes.spaceBtwItems/2),
+                                  const SizedBox(width: PSizes.spaceBtwItems/3),
                                   const Text(
                                     'км',
                                     style: TextStyle(
-                                        fontSize: 18,
+                                        fontSize: 14,
                                         fontFamily: 'Helvetica',
                                         fontWeight: FontWeight.normal),
                                   ),
                                 ])
                                 ],
-                              )],
+                              ),
+                               const Spacer(),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                  '${workout['duration']}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.normal),
+                                  ),
+                                  const SizedBox(height: PSizes.spaceBtwItems/2),
+                                  Text(
+                                  dateStart,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.normal),
+                                  ),
+                                ]),
+                                ],
                               ),
                         ),
                         
                       ),
                     ),
+                    const SizedBox(height: PSizes.spaceBtwInputFields),
                     ]);         
                   },
                  ),
                  );
             }},
+            
           ),
+
+
         ],
       ),
       ),
@@ -106,7 +142,7 @@ class WorkoutList extends StatelessWidget {
     );
   }
 
-Future<List<Map<String, dynamic>>> get_workout() async {
+Future<List<Map<String, dynamic>>> get_workouts() async {
   final prefs = await SharedPreferences.getInstance();
   final String id = prefs.getString('user') ?? '';
 
@@ -135,4 +171,29 @@ Future<List<Map<String, dynamic>>> get_workout() async {
     throw Exception('Failed to load workouts');
   }
   }
+
+  Future<Map<String, dynamic>> get_workout_info(id) async {
+  print(id);
+  final query = {'id': id.replaceAll(RegExp(r'"'), '')};
+  print(query);
+  var url =
+      Uri.https('utterly-comic-parakeet.ngrok-free.app', "workout", query);
+  print(url);
+  try {
+    var response = await http.get(url, headers: {
+      "ngrok-skip-browser-warning": "true",
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    });
+    print(response);
+    var decodedBody = jsonDecode(response.body);
+    if (decodedBody['success'] == false) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    }
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  } catch (e) {
+    print(e);
+    throw Error();
+  }
+}
 }

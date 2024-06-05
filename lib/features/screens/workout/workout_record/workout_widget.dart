@@ -28,6 +28,7 @@ class _State extends State<WorkoutWidget> {
       milisecond = 0,
       time = 0;
   double dist = 0.00, speed = 0.00, weight = 68.5, height = 170.0, pace = 0.00;
+  late DateTime date_start, date_stop;
   String buttonText = 'Начать';
   Color buttonColor = PColors.primary;
 
@@ -137,6 +138,7 @@ class _State extends State<WorkoutWidget> {
   void onStart() {
     setState(
       () {
+        date_start = DateTime.now();
         recordWorkout = true;
         _stopWatchTimer.onStartTimer();
         _stepsPrev = _steps;
@@ -157,6 +159,7 @@ class _State extends State<WorkoutWidget> {
   }
 
   void onStop() {
+    date_stop = DateTime.now();
     recordWorkout = false;
     _stopWatchTimer.onStopTimer();
     _stepsPrev = 0;
@@ -170,7 +173,9 @@ class _State extends State<WorkoutWidget> {
             distance: dist,
             speed: speed,
             pace: pace,
-            calories: calories),
+            calories: calories,
+            date_start: date_start,
+            date_stop: date_stop,),
       ),
     );
     print('temp: $pace');

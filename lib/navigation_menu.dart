@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
+
 import 'features/screens/home/home.dart';
 import 'features/screens/profile/profile.dart';
 import 'features/screens/workout/workout_list/workout_list.dart';
@@ -27,11 +28,15 @@ class NavigationMenu extends StatelessWidget {
           onDestinationSelected: (index) =>
               controller.selectedIndex.value = index,
           destinations: const [
-            NavigationDestination(icon: Icon(Iconsax.home_2), label: 'Главная'),
             NavigationDestination(
-                icon: Icon(Iconsax.weight_1), label: 'Тренировки'),
+              icon: Icon(Iconsax.home_2),
+               label: 'Главная'),
             NavigationDestination(
-                icon: Icon(Iconsax.user), label: 'Мой профиль'),
+                icon: Icon(Iconsax.weight_1), 
+                  label: 'Тренировки'),
+            NavigationDestination(
+                icon: Icon(Iconsax.user),
+                   label: 'Мой профиль'),
           ],
         ),
       ),
