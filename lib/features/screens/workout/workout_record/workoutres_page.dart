@@ -1,18 +1,15 @@
+import 'dart:async';
 import 'dart:convert';
-
-import 'package:fitness_tracker_app/common/widgets/curved_edges.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../../../../common/widgets/curved_edges.dart';
 import '../../../../common/widgets/circular_container.dart';
 import '../../../../navigation_menu.dart';
 import '../../../../utils/const/colors.dart';
 import '../../../../utils/const/sizes.dart';
 import '../../../../utils/helper_functions.dart';
-
-bool _isButtonClicked = false;
 
 class WorkoutResultPage extends StatelessWidget {
   final String timer;
@@ -35,6 +32,61 @@ class WorkoutResultPage extends StatelessWidget {
     required this.date_start,
     required this.date_stop,
   }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: WorkoutResultStateful(
+          timer: timer,
+          steps: steps,
+          distance: distance,
+          speed: speed,
+          pace: pace,
+          calories: calories,
+          date_start: date_start,
+          date_stop: date_stop,
+        ),
+      ),
+    );
+  }
+}
+
+class WorkoutResultStateful extends StatefulWidget {
+  final String timer;
+  final int steps;
+  final double distance;
+  final double speed;
+  final double pace;
+  final int calories;
+  final DateTime date_start;
+  final DateTime date_stop;
+
+  const WorkoutResultStateful({
+    Key? key,
+    required this.timer,
+    required this.steps,
+    required this.distance,
+    required this.speed,
+    required this.pace,
+    required this.calories,
+    required this.date_start,
+    required this.date_stop,
+  }) : super(key: key);
+
+  @override
+  State<WorkoutResultStateful> createState() => _WorkoutResultState();
+}
+
+class _WorkoutResultState extends State<WorkoutResultStateful> {
+  bool clicked = false;
+
+  @override
+  initState() {
+    super.initState();
+   
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +118,7 @@ class WorkoutResultPage extends StatelessWidget {
                         child: Row(
                           children: [
                             Text(
-                              '$distance',
+                              '${widget.distance}',
                               style: const TextStyle(
                                   fontSize: 32,
                                   color: PColors.white,
@@ -105,14 +157,11 @@ class WorkoutResultPage extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 25,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 25),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   const SizedBox(height: PSizes.spaceBtwInputFields),
-
                   const Row(
                     children: [
                       Text(
@@ -124,9 +173,7 @@ class WorkoutResultPage extends StatelessWidget {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: PSizes.spaceBtwInputFields),
-
                   /// Timer
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,7 +187,7 @@ class WorkoutResultPage extends StatelessWidget {
                             fontWeight: FontWeight.normal),
                       ),
                       Text(
-                        timer,
+                        widget.timer,
                         style: const TextStyle(
                             fontSize: 22,
                             fontFamily: 'Helvetica',
@@ -148,9 +195,7 @@ class WorkoutResultPage extends StatelessWidget {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: PSizes.spaceBtwItems),
-
                   /// Distance & Steps
                   Row(
                     children: [
@@ -165,7 +210,7 @@ class WorkoutResultPage extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                '$distance',
+                                '${widget.distance}',
                                 style: const TextStyle(
                                     fontSize: 22,
                                     fontFamily: 'Helvetica',
@@ -196,7 +241,7 @@ class WorkoutResultPage extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '$steps',
+                            '${widget.steps}',
                             style: const TextStyle(
                                 fontSize: 22,
                                 fontFamily: 'Helvetica',
@@ -206,9 +251,7 @@ class WorkoutResultPage extends StatelessWidget {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: PSizes.spaceBtwItems),
-
                   /// Speed and pace
                   Row(
                     children: [
@@ -225,7 +268,7 @@ class WorkoutResultPage extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                '$speed',
+                                '${widget.speed}',
                                 style: const TextStyle(
                                     fontSize: 22,
                                     fontFamily: 'Helvetica',
@@ -258,7 +301,7 @@ class WorkoutResultPage extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                PHelperFunctions.getPace(pace),
+                                PHelperFunctions.getPace(widget.pace),
                                 style: const TextStyle(
                                     fontSize: 22,
                                     fontFamily: 'Helvetica',
@@ -279,9 +322,7 @@ class WorkoutResultPage extends StatelessWidget {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: PSizes.spaceBtwItems),
-
                   /// Calories
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,7 +334,7 @@ class WorkoutResultPage extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            '$calories',
+                            '${widget.calories}',
                             style: const TextStyle(
                                 fontSize: 22,
                                 fontFamily: 'Helvetica',
@@ -311,9 +352,7 @@ class WorkoutResultPage extends StatelessWidget {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: PSizes.spaceBtwSections * 4.5),
-
                   /// Button
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -322,8 +361,18 @@ class WorkoutResultPage extends StatelessWidget {
                       SizedBox(
                         width: 250,
                         child: ElevatedButton(
-                          onPressed: () => createWorkout(steps, distance, speed,
-                              pace, calories, timer, date_start, date_stop),
+                          onPressed: !clicked
+                              ? () => createWorkout(
+                                  widget.steps,
+                                  widget.distance,
+                                  widget.speed,
+                                  widget.pace,
+                                  widget.calories,
+                                  widget.timer,
+                                  widget.date_start,
+                                  widget.date_stop,
+                                )
+                              : null,
                           style: ElevatedButton.styleFrom(
                             side: const BorderSide(
                                 color: Color.fromARGB(0, 0, 0, 0)),
@@ -342,15 +391,16 @@ class WorkoutResultPage extends StatelessWidget {
       ),
     );
   }
-}
 
-Future createWorkout(steps, distance, speed, pace, calories, timer, date_start,
+  Future createWorkout(steps, distance, speed, pace, calories, timer, date_start,
     date_stop) async {
+      setState(() {
+        clicked = true;
+      });
+    
+      await Future.delayed(Duration(seconds: 1));
   final prefs = await SharedPreferences.getInstance();
   final String id = prefs.get('user').toString();
-
-  Get.to(() => const NavigationMenu());
-
   print(id.toString());
   var url =
       Uri.https('utterly-comic-parakeet.ngrok-free.app', "create_workout");
@@ -374,10 +424,10 @@ Future createWorkout(steps, distance, speed, pace, calories, timer, date_start,
           "Accept": "application/json"
         });
     print(response);
-
-    _isButtonClicked = true;
+    Get.to(() => const NavigationMenu());
   } catch (e) {
     print(e);
     return '';
   }
+}
 }

@@ -76,10 +76,12 @@ class _State extends State<WorkoutWidget> {
       //     ((double.parse(p.toStringAsFixed(2)) - p.floor()) * 60).toInt();
       // int paceMinutes = p.toInt();
       pace = p;
-      int paceSeconds =
-          ((double.parse(p.toStringAsFixed(2)) - p.floor()) * 60).toInt();
-      int paceMinutes = p.toInt();
-      avg_pace = paceMinutes.toString() + "'" + paceSeconds.toString() + '"';
+      if (p != double.infinity) {
+        int paceSeconds =
+            ((double.parse(p.toStringAsFixed(2)) - p.floor()) * 60).toInt();
+        int paceMinutes = p.toInt();
+        avg_pace = paceMinutes.toString() + "'" + paceSeconds.toString() + '"';
+      }
 
       double c = (0.035 * weight + (speed / height) * 0.029 * weight) * minutes;
       calories = c.toInt();
@@ -159,6 +161,7 @@ class _State extends State<WorkoutWidget> {
         }
       },
     );
+    
   }
 
   void onStop() {
@@ -167,6 +170,7 @@ class _State extends State<WorkoutWidget> {
     _stopWatchTimer.onStopTimer();
     _stepsPrev = 0;
     _stepsNow = _steps;
+    print(avg_pace);
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -182,7 +186,6 @@ class _State extends State<WorkoutWidget> {
         ),
       ),
     );
-    print('temp: $pace');
   }
 
   @override
@@ -415,4 +418,8 @@ class _State extends State<WorkoutWidget> {
       ),
     );
   }
+
+
+
+  
 }
