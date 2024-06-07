@@ -325,7 +325,7 @@ class _State extends State<WorkoutWidget> {
       final points = locationHistory.map((location) {
         return Point(latitude: location['lat']!, longitude: location['long']!);
       }).toList();
-
+      print(points);
       routePolyline = PolylineMapObject(
         mapId: const MapObjectId('route_polyline'),
         polyline: Polyline(points: points),
@@ -333,8 +333,6 @@ class _State extends State<WorkoutWidget> {
         strokeWidth: 5,
         zIndex: 1,
       );
-
-      setState(() {});
     }
   }
 
@@ -388,6 +386,7 @@ class _State extends State<WorkoutWidget> {
           ),
           opacity: 1,
         );
+        print(locationHistory);
       }
     });
   }
@@ -436,6 +435,10 @@ class _State extends State<WorkoutWidget> {
           calories: calories,
           date_start: date_start,
           date_stop: date_stop,
+          locationHistory: locationHistory,
+          userLocationMarker: userLocationMarker,
+          startMarker: startMarker,
+          endMarker: endMarker,
         ),
       ),
     );
