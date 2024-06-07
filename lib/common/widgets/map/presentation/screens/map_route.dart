@@ -47,6 +47,7 @@ class _MapScreenState extends State<MapRoute> {
               onMapCreated: (controller) async {
                 mapControllerCompleter.complete(controller);
               },
+              
               mapObjects: [
                 if (userLocationMarker != null) userLocationMarker!,
                 if (routePolyline != null) routePolyline!,
@@ -130,10 +131,10 @@ class _MapScreenState extends State<MapRoute> {
         PlacemarkIconStyle(
           image:
               BitmapDescriptor.fromAssetImage('assets/map/user_location.png'),
-          scale: 1.0,
-          zIndex: 1,
+          scale: 1,
         ),
       ),
+      opacity: 1,
     );
     print(appLatLong.lat);
     print(appLatLong.long);
@@ -150,7 +151,7 @@ class _MapScreenState extends State<MapRoute> {
         mapId: const MapObjectId('route_polyline'),
         polyline: Polyline(points: points),
         strokeColor: Colors.blue,
-        strokeWidth: 5,
+        strokeWidth: 10,
       );
 
       setState(() {});
@@ -160,6 +161,7 @@ class _MapScreenState extends State<MapRoute> {
   void _startRecording() {
     setState(() {
       isRecording = true;
+      startMarker = null;
       endMarker = null;
       locationHistory.clear(); // Очистка истории при новом старте записи
 
@@ -177,6 +179,7 @@ class _MapScreenState extends State<MapRoute> {
               scale: 2.5,
             ),
           ),
+          opacity: 1,
         );
       }
     });
@@ -196,6 +199,7 @@ class _MapScreenState extends State<MapRoute> {
             latitude: endLocation['lat']!,
             longitude: endLocation['long']!,
           ),
+          
           icon: PlacemarkIcon.single(
             PlacemarkIconStyle(
               image: BitmapDescriptor.fromAssetImage(
@@ -203,6 +207,7 @@ class _MapScreenState extends State<MapRoute> {
               scale: 2.5,
             ),
           ),
+          opacity: 1,
         );
       }
     });
