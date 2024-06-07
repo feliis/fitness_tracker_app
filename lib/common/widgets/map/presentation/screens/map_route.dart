@@ -10,10 +10,10 @@ class MapRoute extends StatefulWidget {
   const MapRoute({Key? key}) : super(key: key);
 
   @override
-  State<MapRoute> createState() => _MapScreenState();
+  State<MapRoute> createState() => MapScreenState();
 }
 
-class _MapScreenState extends State<MapRoute> {
+class MapScreenState extends State<MapRoute> {
   final mapControllerCompleter = Completer<YandexMapController>();
   PlacemarkMapObject? userLocationMarker;
   PolylineMapObject? routePolyline;
@@ -23,23 +23,20 @@ class _MapScreenState extends State<MapRoute> {
   bool isRecording = false;
 
   @override
-  void initState() {
-    super.initState();
-    _initPermission().ignore();
+void initState() {
+  super.initState();
+  initPermission().ignore();
+  Timer.periodic(Duration(seconds: 1), (timer) {
+    if (isRecording) {
+      fetchCurrentLocation();
+    }
+  });
+}
 
-    Timer.periodic(Duration(seconds: 1), (timer) {
-      if (isRecording) {
-        _fetchCurrentLocation();
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Текущее местоположение'),
-      ),
       body: Column(
         children: [
           Expanded(
@@ -56,33 +53,19 @@ class _MapScreenState extends State<MapRoute> {
               ],
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: _startRecording,
-                child: const Text('Старт'),
-              ),
-              const SizedBox(width: 10),
-              ElevatedButton(
-                onPressed: _stopRecording,
-                child: const Text('Стоп'),
-              ),
-            ],
-          ),
         ],
       ),
     );
   }
 
-  Future<void> _initPermission() async {
+  Future<void> initPermission() async {
     if (!await LocationService().checkPermission()) {
       await LocationService().requestPermission();
     }
-    await _fetchCurrentLocation();
+    await fetchCurrentLocation();
   }
 
-  Future<void> _fetchCurrentLocation() async {
+  Future<void> fetchCurrentLocation() async {
     AppLatLong location;
     const defLocation = MoscowLocation();
     try {
@@ -90,8 +73,8 @@ class _MapScreenState extends State<MapRoute> {
     } catch (_) {
       location = defLocation;
     }
-    _moveToCurrentLocation(location);
-    _addUserLocationMarker(location);
+    moveToCurrentLocation(location);
+    addUserLocationMarker(location);
 
     if (isRecording) {
       setState(() {
@@ -99,12 +82,12 @@ class _MapScreenState extends State<MapRoute> {
           'lat': location.lat,
           'long': location.long,
         });
-        _updateRoutePolyline();
+        updateRoutePolyline();
       });
     }
   }
 
-  Future<void> _moveToCurrentLocation(AppLatLong appLatLong) async {
+  Future<void> moveToCurrentLocation(AppLatLong appLatLong) async {
     final controller = await mapControllerCompleter.future;
     controller.moveCamera(
       animation: const MapAnimation(type: MapAnimationType.linear, duration: 1),
@@ -114,13 +97,13 @@ class _MapScreenState extends State<MapRoute> {
             latitude: appLatLong.lat,
             longitude: appLatLong.long,
           ),
-          zoom: 17,
+          zoom: 16,
         ),
       ),
     );
   }
 
-  void _addUserLocationMarker(AppLatLong appLatLong) {
+  void addUserLocationMarker(AppLatLong appLatLong) {
     userLocationMarker = PlacemarkMapObject(
       mapId: const MapObjectId('user_location'),
       point: Point(
@@ -141,7 +124,7 @@ class _MapScreenState extends State<MapRoute> {
     setState(() {});
   }
 
-  void _updateRoutePolyline() {
+  void updateRoutePolyline() {
     if (locationHistory.isNotEmpty) {
       final points = locationHistory.map((location) {
         return Point(latitude: location['lat']!, longitude: location['long']!);
@@ -151,14 +134,15 @@ class _MapScreenState extends State<MapRoute> {
         mapId: const MapObjectId('route_polyline'),
         polyline: Polyline(points: points),
         strokeColor: Colors.blue,
-        strokeWidth: 10,
+        strokeWidth: 5,
+        zIndex: 1,
       );
 
       setState(() {});
     }
   }
 
-  void _startRecording() {
+  void startRecording() {
     setState(() {
       isRecording = true;
       startMarker = null;
@@ -185,7 +169,7 @@ class _MapScreenState extends State<MapRoute> {
     });
   }
 
-  void _stopRecording() {
+  void stopRecording() {
     setState(() {
       userLocationMarker = null;
       isRecording = false;

@@ -55,9 +55,11 @@ class _MapScreenState extends State<MapScreen> {
     } catch (_) {
       location = defLocation;
     }
+    print(location);
     _moveToCurrentLocation(location);
     _addUserLocationMarker(location);
   }
+
 
   /// Метод для показа текущей позиции
   Future<void> _moveToCurrentLocation(AppLatLong appLatLong) async {
