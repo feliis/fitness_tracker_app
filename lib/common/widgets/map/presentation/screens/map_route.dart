@@ -23,16 +23,15 @@ class MapScreenState extends State<MapRoute> {
   bool isRecording = false;
 
   @override
-void initState() {
-  super.initState();
-  initPermission().ignore();
-  Timer.periodic(Duration(seconds: 1), (timer) {
-    if (isRecording) {
-      fetchCurrentLocation();
-    }
-  });
-}
-
+  void initState() {
+    super.initState();
+    initPermission().ignore();
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      if (isRecording) {
+        fetchCurrentLocation();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +43,6 @@ void initState() {
               onMapCreated: (controller) async {
                 mapControllerCompleter.complete(controller);
               },
-              
               mapObjects: [
                 if (userLocationMarker != null) userLocationMarker!,
                 if (routePolyline != null) routePolyline!,
@@ -97,7 +95,7 @@ void initState() {
             latitude: appLatLong.lat,
             longitude: appLatLong.long,
           ),
-          zoom: 16,
+          zoom: 20,
         ),
       ),
     );
@@ -183,7 +181,6 @@ void initState() {
             latitude: endLocation['lat']!,
             longitude: endLocation['long']!,
           ),
-          
           icon: PlacemarkIcon.single(
             PlacemarkIconStyle(
               image: BitmapDescriptor.fromAssetImage(

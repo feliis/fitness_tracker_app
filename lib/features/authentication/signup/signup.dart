@@ -17,8 +17,6 @@ import '../../../utils/const/colors.dart';
 import '../../../utils/helper_functions.dart';
 import 'signup_controller.dart';
 
-
-
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -171,7 +169,7 @@ class _SignupState extends State<SignupScreen> {
                           labelText: PTexts.dateOfBirth,
                           prefixIcon: Icon(Iconsax.calendar_1),
                           hintText: PTexts.dateOfBirth,
-                          filled: true,
+                          filled: false,
                         ),
                         readOnly: true,
                         onTap: () {
@@ -221,19 +219,22 @@ class _SignupState extends State<SignupScreen> {
                     // const SizedBox(height: PSizes.spaceBtwInputFields),
 
                     /// Password
-                    TextFormField(
-                      controller: controller.password,
-                      validator: (value) => Validator.validateEmptyText(value),
-                      obscureText: controller.hidePassword.value,
-                      decoration: InputDecoration(
-                        labelText: PTexts.password,
-                        prefixIcon: const Icon(Iconsax.password_check),
-                        suffixIcon: IconButton(
-                          onPressed: () => controller.hidePassword.value =
-                              !controller.hidePassword.value,
-                          icon: Icon(controller.hidePassword.value
-                              ? Iconsax.eye_slash
-                              : Iconsax.eye),
+                    Obx(
+                      () => TextFormField(
+                        controller: controller.password,
+                        validator: (value) =>
+                            Validator.validateEmptyText(value),
+                        obscureText: controller.hidePassword.value,
+                        decoration: InputDecoration(
+                          labelText: PTexts.password,
+                          prefixIcon: Icon(Iconsax.password_check),
+                          suffixIcon: IconButton(
+                            onPressed: () => controller.hidePassword.value =
+                                !controller.hidePassword.value,
+                            icon: Icon(controller.hidePassword.value
+                                ? Iconsax.eye_slash
+                                : Iconsax.eye),
+                          ),
                         ),
                       ),
                     ),
@@ -299,11 +300,8 @@ class _SignupState extends State<SignupScreen> {
     }
   }
 
-
-
-  Future<String> createUser(name, lastname, username, sex, birthday, height, weight, password) async {
-
-  
+  Future<String> createUser(
+      name, lastname, username, sex, birthday, height, weight, password) async {
     var url = Uri.https('utterly-comic-parakeet.ngrok-free.app', "signup");
     print(url);
     try {
