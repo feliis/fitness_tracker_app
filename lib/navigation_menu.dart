@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-
-import 'features/screens/home/home.dart';
 import 'features/screens/profile/profile.dart';
+import 'features/screens/workout/geolocator.dart';
 import 'features/screens/workout/workout_list/workout_list.dart';
 import 'utils/const/colors.dart';
 import 'utils/helper_functions.dart';
@@ -28,15 +27,11 @@ class NavigationMenu extends StatelessWidget {
           onDestinationSelected: (index) =>
               controller.selectedIndex.value = index,
           destinations: const [
+            NavigationDestination(icon: Icon(Iconsax.home_2), label: 'Главная'),
             NavigationDestination(
-              icon: Icon(Iconsax.home_2),
-               label: 'Главная'),
+                icon: Icon(Iconsax.weight_1), label: 'Тренировки'),
             NavigationDestination(
-                icon: Icon(Iconsax.weight_1), 
-                  label: 'Тренировки'),
-            NavigationDestination(
-                icon: Icon(Iconsax.user),
-                   label: 'Мой профиль'),
+                icon: Icon(Iconsax.user), label: 'Мой профиль'),
           ],
         ),
       ),
@@ -49,9 +44,8 @@ class NavigationController extends GetxController {
   final Rx<int> selectedIndex = 0.obs;
 
   final screens = [
-    const MainPage(),
+    const MyApp(),
     const WorkoutList(),
-    // MyApp(),
     const ProfileScreen(),
   ];
 }
