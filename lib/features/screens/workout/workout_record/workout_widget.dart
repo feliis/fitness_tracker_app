@@ -13,6 +13,7 @@ import '../../../../common/widgets/map/domain/app_lat_long.dart';
 import '../../../../common/widgets/map/domain/location_service.dart';
 import '../../../../utils/const/colors.dart';
 import '../../../../utils/const/sizes.dart';
+import '../../../../utils/helper_functions.dart';
 import 'workoutres_page.dart';
 
 class WorkoutWidget extends StatefulWidget {
@@ -25,7 +26,7 @@ class WorkoutWidget extends StatefulWidget {
 class _State extends State<WorkoutWidget> {
   late Stream<StepCount> _stepCountStream;
   late Stream<PedestrianStatus> _pedestrianStatusStream;
-  bool recordWorkout = false,_isFirstWidgetVisible = true;
+  bool recordWorkout = false, _isFirstWidgetVisible = true;
   String _status = '?';
   int _steps = 0,
       _stepsPrev = 0,
@@ -62,17 +63,17 @@ class _State extends State<WorkoutWidget> {
   @override
   void initState() {
     super.initState();
-    
+
     initPlatformState();
     initPermission().ignore();
     Timer.periodic(Duration(seconds: 1), (timer) {
-    if (isRecording) {
-      fetchCurrentLocation();
-    }
+      if (isRecording) {
+        fetchCurrentLocation();
+      }
     });
   }
 
-    @override
+  @override
   void dispose() async {
     super.dispose();
     await _stopWatchTimer.dispose();
@@ -80,6 +81,7 @@ class _State extends State<WorkoutWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final dark = PHelperFunctions.isDarkMode(context);
     return Scaffold(
       appBar: const PAppBar(
         showBackArrow: false,
@@ -87,75 +89,81 @@ class _State extends State<WorkoutWidget> {
       ),
       body: Scrollbar(
         child: SingleChildScrollView(
-          
-          child: Column
-          (
-            children: [
-              SizedBox(
-                height: 650,
-                child: 
-              Stack(
-                children: <Widget>[
-                  Visibility(
+            child: Column(
+          children: [
+            SizedBox(
+              height: 650,
+              child: Stack(children: <Widget>[
+                Container(
+                  child: MapScreen(
+                      mapControllerCompleter: mapControllerCompleter,
+                      userLocationMarker: userLocationMarker,
+                      routePolyline: routePolyline,
+                      startMarker: startMarker,
+                      endMarker: endMarker),
+                ),
+                Visibility(
                     visible: _isFirstWidgetVisible,
                     child: Container(
-                      child: 
-                        TrackerWidget(stopWatchTimer: _stopWatchTimer, isHours: _isHours, recordWorkout: recordWorkout, dist: dist, steps: _steps, speed: speed, avg_pace: avg_pace, calories: calories),
-                    )),
-                  Visibility(
-                    visible: !_isFirstWidgetVisible,
-                    child: Container(
-                      child: 
-                        MapScreen(mapControllerCompleter: mapControllerCompleter, userLocationMarker: userLocationMarker, routePolyline: routePolyline, startMarker: startMarker, endMarker: endMarker),
+                      color: dark ? Colors.black : Colors.white,
+                      child: TrackerWidget(
+                          stopWatchTimer: _stopWatchTimer,
+                          isHours: _isHours,
+                          recordWorkout: recordWorkout,
+                          dist: dist,
+                          steps: _steps,
+                          speed: speed,
+                          avg_pace: avg_pace,
+                          calories: calories),
                     )),
               ]),
-              ),
-           
-              const SizedBox(height: PSizes.spaceBtwSections),
-              /// Buttons
-              Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 250,
-                      child: 
-                      ElevatedButton(
+            ),
+
+            const SizedBox(height: PSizes.spaceBtwSections),
+
+            /// Buttons
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 250,
+                  child: ElevatedButton(
                     onPressed: recordWorkout ? onStop : onStart,
                     child: Text(buttonText),
                     style: ElevatedButton.styleFrom(
                       side: const BorderSide(color: Color.fromARGB(0, 0, 0, 0)),
                       backgroundColor: buttonColor,
                     ),
+                  ),
                 ),
-                    ),
-                  const SizedBox(width: PSizes.spaceBtwSections),
-                  Container(
+                const SizedBox(width: PSizes.spaceBtwSections),
+                Container(
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: PColors.grey,  // Цвет фона кнопки
+                    color: PColors.grey, // Цвет фона кнопки
                   ),
                   child: IconButton(
-                    icon: _isFirstWidgetVisible ? Icon(Iconsax.location) : Icon(Iconsax.element_equal),
-                    color: PColors.black,  // Цвет иконки
-                    onPressed: () {
-                    setState(() {
-                      fetchCurrentLocation();
-
-                      _isFirstWidgetVisible = !_isFirstWidgetVisible; // Переключение состояния видимости виджетов
-                    });},
+                    icon: _isFirstWidgetVisible
+                        ? Icon(Iconsax.location)
+                        : Icon(Iconsax.element_equal),
+                    color: PColors.black, // Цвет иконки
+                    onPressed: () => _toggleVisibility(),
                   ),
-                )],
-              ),
-              
-          ],)
-          
-          ),
-        ),
+                )
+              ],
+            ),
+          ],
+        )),
+      ),
     );
   }
 
-
+  void _toggleVisibility() {
+    setState(() {
+      _isFirstWidgetVisible = !_isFirstWidgetVisible;
+    });
+  }
 
   double roundDouble(double value, int places) {
     num mod = pow(10.0, places);
@@ -245,7 +253,7 @@ class _State extends State<WorkoutWidget> {
     return formattedTime;
   }
 
-Future<void> initPermission() async {
+  Future<void> initPermission() async {
     if (!await LocationService().checkPermission()) {
       await LocationService().requestPermission();
     }
@@ -260,12 +268,9 @@ Future<void> initPermission() async {
     } catch (_) {
       location = defLocation;
     }
-    print('---------------------------');
-    print(location);
     addUserLocationMarker(location);
     moveToCurrentLocation(location);
     if (isRecording) {
-      
       setState(() {
         moveToCurrentLocation(location);
         locationHistory.add({
@@ -288,8 +293,7 @@ Future<void> initPermission() async {
             latitude: appLatLong.lat,
             longitude: appLatLong.long,
           ),
-         zoom: 18,
-          
+          zoom: 18,
         ),
       ),
     );
@@ -375,7 +379,6 @@ Future<void> initPermission() async {
             latitude: endLocation['lat']!,
             longitude: endLocation['long']!,
           ),
-          
           icon: PlacemarkIcon.single(
             PlacemarkIconStyle(
               image: BitmapDescriptor.fromAssetImage(
@@ -411,7 +414,6 @@ Future<void> initPermission() async {
         }
       },
     );
-    
   }
 
   void onStop() {
@@ -455,7 +457,6 @@ class MapScreen extends StatelessWidget {
   final PolylineMapObject? routePolyline;
   final PlacemarkMapObject? startMarker;
   final PlacemarkMapObject? endMarker;
-  
 
   @override
   Widget build(BuildContext context) {
@@ -472,7 +473,6 @@ class MapScreen extends StatelessWidget {
               if (startMarker != null) startMarker!,
               if (endMarker != null) endMarker!,
             ],
-            
           ),
         ),
       ],
@@ -491,7 +491,9 @@ class TrackerWidget extends StatelessWidget {
     required this.speed,
     required this.avg_pace,
     required this.calories,
-  }) : _stopWatchTimer = stopWatchTimer, _isHours = isHours, _steps = steps;
+  })  : _stopWatchTimer = stopWatchTimer,
+        _isHours = isHours,
+        _steps = steps;
 
   final StopWatchTimer _stopWatchTimer;
   final bool _isHours;
@@ -505,200 +507,198 @@ class TrackerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-    padding: const EdgeInsets.symmetric(
-      vertical: 32,
-      horizontal: 16,
-    ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        const SizedBox(height: PSizes.spaceBtwSections),
-    
-        /// Display stop watch time
-        StreamBuilder<int>(
-          stream: _stopWatchTimer.rawTime,
-          initialData: _stopWatchTimer.rawTime.value,
-          builder: (context, snap) {
-            final value = snap.data!;
-            final time =
-                StopWatchTimer.getDisplayTime(value, hours: _isHours);
-            return Column(
-              children: <Widget>[
-                const Text(
-                  'Время',
-                  style: TextStyle(fontSize: 18),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Text(
-                    time,
-                    style: const TextStyle(
-                        fontSize: 28,
-                        fontFamily: 'Helvetica',
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            );
-          },
+        padding: const EdgeInsets.symmetric(
+          vertical: 32,
+          horizontal: 16,
         ),
-    
-        const SizedBox(height: PSizes.spaceBtwInputFields * 2),
-    
-        /// Distance & Steps
-        Row(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Text(
-                  'Расстояние',
-                  style: TextStyle(fontSize: 18),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      recordWorkout ? '$dist' : '0.0',
-                      style: const TextStyle(
-                          fontSize: 28,
-                          fontFamily: 'Helvetica',
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: PSizes.spaceBtwInputFields),
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            const SizedBox(height: PSizes.spaceBtwSections),
+
+            /// Display stop watch time
+            StreamBuilder<int>(
+              stream: _stopWatchTimer.rawTime,
+              initialData: _stopWatchTimer.rawTime.value,
+              builder: (context, snap) {
+                final value = snap.data!;
+                final time =
+                    StopWatchTimer.getDisplayTime(value, hours: _isHours);
+                return Column(
+                  children: <Widget>[
                     const Text(
-                      'км',
-                      style: TextStyle(
-                          fontSize: 22,
-                          fontFamily: 'Helvetica',
-                          fontWeight: FontWeight.normal),
+                      'Время',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Text(
+                        time,
+                        style: const TextStyle(
+                            fontSize: 28,
+                            fontFamily: 'Helvetica',
+                            fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ],
-                ),
-              ],
+                );
+              },
             ),
-            const SizedBox(width: PSizes.spaceBtwInputFields * 3),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Text(
-                  'Шаги',
-                  style: TextStyle(fontSize: 18),
-                ),
-                Text(
-                  recordWorkout ? '$_steps' : '0',
-                  style: const TextStyle(
-                      fontSize: 28,
-                      fontFamily: 'Helvetica',
-                      fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ],
-        ),
-    
-        const SizedBox(height: PSizes.spaceBtwInputFields * 2),
-    
-        /// Speed and pace
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'Скорость',
-                  style: TextStyle(fontSize: 18),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      recordWorkout ? '$speed' : '--',
-                      style: const TextStyle(
-                          fontSize: 28,
-                          fontFamily: 'Helvetica',
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: PSizes.spaceBtwInputFields),
-                    const Text(
-                      'км/ч',
-                      style: TextStyle(
-                          fontSize: 22,
-                          fontFamily: 'Helvetica',
-                          fontWeight: FontWeight.normal),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(width: PSizes.spaceBtwInputFields * 3),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'Темп',
-                  style: TextStyle(fontSize: 18),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      recordWorkout ? avg_pace : '--',
-                      style: const TextStyle(
-                          fontSize: 28,
-                          fontFamily: 'Helvetica',
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: PSizes.spaceBtwInputFields),
-                    const Text(
-                      '/км',
-                      style: TextStyle(
-                          fontSize: 22,
-                          fontFamily: 'Helvetica',
-                          fontWeight: FontWeight.normal),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-    
-        const SizedBox(height: PSizes.spaceBtwInputFields * 2),
-    
-        /// Calories
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Калории',
-              style: TextStyle(fontSize: 18),
-            ),
+
+            const SizedBox(height: PSizes.spaceBtwInputFields * 2),
+
+            /// Distance & Steps
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  recordWorkout ? '$calories' : '0',
-                  style: const TextStyle(
-                      fontSize: 28,
-                      fontFamily: 'Helvetica',
-                      fontWeight: FontWeight.bold),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    const Text(
+                      'Расстояние',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          recordWorkout ? '$dist' : '0.0',
+                          style: const TextStyle(
+                              fontSize: 28,
+                              fontFamily: 'Helvetica',
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: PSizes.spaceBtwInputFields),
+                        const Text(
+                          'км',
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontFamily: 'Helvetica',
+                              fontWeight: FontWeight.normal),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                const SizedBox(width: PSizes.spaceBtwInputFields),
+                const SizedBox(width: PSizes.spaceBtwInputFields * 3),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    const Text(
+                      'Шаги',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    Text(
+                      recordWorkout ? '$_steps' : '0',
+                      style: const TextStyle(
+                          fontSize: 28,
+                          fontFamily: 'Helvetica',
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            const SizedBox(height: PSizes.spaceBtwInputFields * 2),
+
+            /// Speed and pace
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Скорость',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          recordWorkout ? '$speed' : '--',
+                          style: const TextStyle(
+                              fontSize: 28,
+                              fontFamily: 'Helvetica',
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: PSizes.spaceBtwInputFields),
+                        const Text(
+                          'км/ч',
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontFamily: 'Helvetica',
+                              fontWeight: FontWeight.normal),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(width: PSizes.spaceBtwInputFields * 3),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Темп',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          recordWorkout ? avg_pace : '--',
+                          style: const TextStyle(
+                              fontSize: 28,
+                              fontFamily: 'Helvetica',
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: PSizes.spaceBtwInputFields),
+                        const Text(
+                          '/км',
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontFamily: 'Helvetica',
+                              fontWeight: FontWeight.normal),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            const SizedBox(height: PSizes.spaceBtwInputFields * 2),
+
+            /// Calories
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
                 const Text(
-                  'ккал',
-                  style: TextStyle(
-                      fontSize: 22,
-                      fontFamily: 'Helvetica',
-                      fontWeight: FontWeight.normal),
+                  'Калории',
+                  style: TextStyle(fontSize: 18),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      recordWorkout ? '$calories' : '0',
+                      style: const TextStyle(
+                          fontSize: 28,
+                          fontFamily: 'Helvetica',
+                          fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(width: PSizes.spaceBtwInputFields),
+                    const Text(
+                      'ккал',
+                      style: TextStyle(
+                          fontSize: 22,
+                          fontFamily: 'Helvetica',
+                          fontWeight: FontWeight.normal),
+                    ),
+                  ],
                 ),
               ],
             ),
           ],
-        ),
-                  ],)
-                  
-        
-                );
+        ));
   }
 }
