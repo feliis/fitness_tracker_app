@@ -1,4 +1,5 @@
 import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../domain/app_lat_long.dart';
 import '../domain/app_location.dart';
@@ -30,6 +31,23 @@ class LocationService implements AppLocation {
         .then((value) =>
             value == LocationPermission.always ||
             value == LocationPermission.whileInUse)
+        .catchError((_) => false);
+  }
+
+  Future<bool> requestPhysicalActivityPermission() {
+    return Permission.activityRecognition
+        .request()
+        .then((status) =>
+            status == PermissionStatus.granted ||
+            status == PermissionStatus.limited)
+        .catchError((_) => false);
+  }
+
+  Future<bool> checkPhysicalActivityPermission() {
+    return Permission.activityRecognition.status
+        .then((status) =>
+            status == PermissionStatus.granted ||
+            status == PermissionStatus.limited)
         .catchError((_) => false);
   }
 }

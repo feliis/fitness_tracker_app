@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:pedometer/pedometer.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
@@ -254,9 +253,21 @@ class _State extends State<WorkoutWidget> {
   }
 
   Future<void> initPermission() async {
-    if (!await LocationService().checkPermission()) {
-      await LocationService().requestPermission();
+    LocationService locationService = LocationService();
+
+    bool hasLocationPermission = await locationService.checkPermission();
+    bool hasPhysicalActivityPermission =
+        await locationService.checkPhysicalActivityPermission();
+
+    if (!hasLocationPermission || !hasPhysicalActivityPermission) {
+      if (!hasLocationPermission) {
+        await locationService.requestPermission();
+      }
+      if (!hasPhysicalActivityPermission) {
+        await locationService.requestPhysicalActivityPermission();
+      }
     }
+
     await fetchCurrentLocation();
   }
 
@@ -436,9 +447,6 @@ class _State extends State<WorkoutWidget> {
           date_start: date_start,
           date_stop: date_stop,
           locationHistory: locationHistory,
-          userLocationMarker: userLocationMarker,
-          startMarker: startMarker,
-          endMarker: endMarker,
         ),
       ),
     );

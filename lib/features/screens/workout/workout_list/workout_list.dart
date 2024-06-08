@@ -1,4 +1,6 @@
 import 'dart:convert';
+
+import 'package:fitness_tracker_app/features/screens/workout/workout_record/workout_detail.dart';
 import 'package:fitness_tracker_app/features/screens/workout/workout_record/workout_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -48,7 +50,30 @@ class WorkoutList extends StatelessWidget {
 
                           return Column(children: [
                             InkWell(
-                              onTap: () => get_workout_info('${workout['id']}'),
+                              onTap: () async {
+                                // Получите данные о конкретной тренировке
+                                Map<String, dynamic> data =
+                                    await get_workout_info('${workout['id']}');
+                                // Переходите на экран WorkoutDetail и передайте данные
+                                Get.to(() => WorkoutDetail(
+                                      timer: '${data['duration']}',
+                                      steps: '${data['steps']}',
+                                      distance: '${data['distance']}',
+                                      speed: '${data['speed']}',
+                                      pace: '${data['pace']}',
+                                      calories: '${data['calories']}',
+                                      date_start: '${data['date_start']}',
+                                      date_stop: '${data['date_stop']}',
+                                      locationHistory: (data['coordinates']
+                                              as List)
+                                          .map((coord) => {
+                                                'lat': (coord['lat'] as double),
+                                                'long':
+                                                    (coord['long'] as double),
+                                              })
+                                          .toList(),
+                                    ));
+                              },
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: PColors.lightGrey,
@@ -195,7 +220,7 @@ class WorkoutList extends StatelessWidget {
       if (decodedBody['success'] == false) {
         return jsonDecode(response.body) as Map<String, dynamic>;
       }
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      return decodedBody as Map<String, dynamic>;
     } catch (e) {
       print(e);
       throw Error();
