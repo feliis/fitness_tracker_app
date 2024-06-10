@@ -11,6 +11,7 @@ import '../../../../navigation_menu.dart';
 import '../../../../utils/const/colors.dart';
 
 class WorkoutResultPage extends StatelessWidget {
+  final String type_activity;
   final String timer;
   final int steps;
   final double distance;
@@ -23,6 +24,7 @@ class WorkoutResultPage extends StatelessWidget {
 
   const WorkoutResultPage({
     Key? key,
+    required this.type_activity,
     required this.timer,
     required this.steps,
     required this.distance,
@@ -40,6 +42,7 @@ class WorkoutResultPage extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: WorkoutResultStateful(
+          type_activity: type_activity,
           timer: timer,
           steps: steps,
           distance: distance,
@@ -56,6 +59,7 @@ class WorkoutResultPage extends StatelessWidget {
 }
 
 class WorkoutResultStateful extends StatefulWidget {
+  final String type_activity;
   final String timer;
   final int steps;
   final double distance;
@@ -68,6 +72,7 @@ class WorkoutResultStateful extends StatefulWidget {
 
   const WorkoutResultStateful({
     Key? key,
+    required this.type_activity,
     required this.timer,
     required this.steps,
     required this.distance,
@@ -119,6 +124,7 @@ class _WorkoutResultState extends State<WorkoutResultStateful> {
                   child: ElevatedButton(
                     onPressed: !clicked
                         ? () => createWorkout(
+                              widget.type_activity,
                               widget.steps,
                               widget.distance,
                               widget.speed,
@@ -145,8 +151,8 @@ class _WorkoutResultState extends State<WorkoutResultStateful> {
     );
   }
 
-  Future createWorkout(steps, distance, speed, pace, calories, timer,
-      date_start, date_stop, coordinates) async {
+  Future createWorkout(type_activity, steps, distance, speed, pace, calories,
+      timer, date_start, date_stop, coordinates) async {
     setState(() {
       clicked = true;
     });
@@ -162,6 +168,7 @@ class _WorkoutResultState extends State<WorkoutResultStateful> {
       var response = await http.post(url,
           body: jsonEncode({
             'user_id': '${id.replaceAll(RegExp(r'"'), '')}',
+            'type_activity': '${type_activity.replaceAll(RegExp(r'"'), '')}',
             'steps': steps.toString(),
             'distance': distance.toString(),
             'speed': speed.toString(),

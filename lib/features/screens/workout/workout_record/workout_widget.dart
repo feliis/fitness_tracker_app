@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:iconsax/iconsax.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
@@ -23,9 +25,10 @@ class WorkoutWidget extends StatefulWidget {
 }
 
 class _State extends State<WorkoutWidget> {
+  Map<String, dynamic>? selectedActivity;
   late Stream<StepCount> _stepCountStream;
   late Stream<PedestrianStatus> _pedestrianStatusStream;
-  bool recordWorkout = false, _isFirstWidgetVisible = true;
+  bool _isRecordWorkout = false, _isFirstWidgetVisible = false;
   String _status = '?';
   int _steps = 0,
       _stepsPrev = 0,
@@ -34,8 +37,12 @@ class _State extends State<WorkoutWidget> {
       milisecond = 0,
       time = 0;
   double dist = 0.00, speed = 0.00, weight = 68.5, height = 170.0, pace = 0.00;
+  double? met = 0.00;
   late DateTime date_start, date_stop;
-  String buttonText = 'Начать', avg_pace = '0' + "'00" + '"';
+  String buttonText = 'Начать',
+      avg_pace = '0' + "'00" + '"',
+      titleScreen = 'Тренировка',
+      type_activity = '';
   Icon iconButton = Icon(Iconsax.location);
   Color buttonColor = PColors.primary;
   final _isHours = true;
@@ -82,9 +89,9 @@ class _State extends State<WorkoutWidget> {
   Widget build(BuildContext context) {
     final dark = PHelperFunctions.isDarkMode(context);
     return Scaffold(
-      appBar: const PAppBar(
+      appBar: PAppBar(
         showBackArrow: false,
-        title: Text('Тренировка'),
+        title: Text(titleScreen),
       ),
       body: Scrollbar(
         child: SingleChildScrollView(
@@ -102,13 +109,67 @@ class _State extends State<WorkoutWidget> {
                       endMarker: endMarker),
                 ),
                 Visibility(
+                  visible: !_isRecordWorkout,
+                  child: Positioned(
+                    bottom: 25,
+                    left: 0,
+                    right: 0,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
+                      child: Opacity(
+                        opacity: 0.9,
+                        child: Container(
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: PColors.white,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Center(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: 8,
+                                horizontal: 25,
+                              ),
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: DropdownActivity(
+                                        onActivitySelected: (activity) {
+                                      setState(() {
+                                        selectedActivity = activity;
+                                      });
+                                    }),
+                                  ),
+                                  SizedBox(height: PSizes.spaceBtwItems / 2),
+                                  Text(
+                                    'Выберите упражнение для начала тренировки',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.normal,
+                                      color: PColors.darkGrey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Visibility(
                     visible: _isFirstWidgetVisible,
                     child: Container(
                       color: dark ? Colors.black : Colors.white,
                       child: TrackerWidget(
                           stopWatchTimer: _stopWatchTimer,
                           isHours: _isHours,
-                          recordWorkout: recordWorkout,
+                          recordWorkout: _isRecordWorkout,
                           dist: dist,
                           steps: _steps,
                           speed: speed,
@@ -128,7 +189,8 @@ class _State extends State<WorkoutWidget> {
                 SizedBox(
                   width: 250,
                   child: ElevatedButton(
-                    onPressed: recordWorkout ? onStop : onStart,
+                    onPressed: () =>
+                        _isRecordWorkout ? onStop() : onStart(selectedActivity),
                     child: Text(buttonText),
                     style: ElevatedButton.styleFrom(
                       side: const BorderSide(color: Color.fromARGB(0, 0, 0, 0)),
@@ -137,19 +199,22 @@ class _State extends State<WorkoutWidget> {
                   ),
                 ),
                 const SizedBox(width: PSizes.spaceBtwSections),
-                Container(
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: PColors.grey, // Цвет фона кнопки
+                Visibility(
+                  visible: _isRecordWorkout,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: PColors.grey, // Цвет фона кнопки
+                    ),
+                    child: IconButton(
+                      icon: _isFirstWidgetVisible
+                          ? Icon(Iconsax.location)
+                          : Icon(Iconsax.element_equal),
+                      color: PColors.black, // Цвет иконки
+                      onPressed: () => _toggleVisibility(),
+                    ),
                   ),
-                  child: IconButton(
-                    icon: _isFirstWidgetVisible
-                        ? Icon(Iconsax.location)
-                        : Icon(Iconsax.element_equal),
-                    color: PColors.black, // Цвет иконки
-                    onPressed: () => _toggleVisibility(),
-                  ),
-                )
+                ),
               ],
             ),
           ],
@@ -179,8 +244,8 @@ class _State extends State<WorkoutWidget> {
 
   void setSpeed(int time) {
     setState(() {
-      double minutes = (time / 60000);
-      double s = (dist / (minutes / 60));
+      double hours = (time / 3600000);
+      double s = (dist / (hours));
       speed = double.parse(s.toStringAsFixed(2));
       double p = 60 / speed;
 
@@ -195,8 +260,9 @@ class _State extends State<WorkoutWidget> {
         avg_pace = paceMinutes.toString() + "'" + paceSeconds.toString() + '"';
       }
 
-      double c = (0.035 * weight + (speed / height) * 0.029 * weight) * minutes;
-      calories = c.toInt();
+      // double c = (0.035 * weight + (speed / height) * 0.029 * weight) * minutes;
+      // calories = c.toInt();
+      calories = (met! * weight * hours).toInt();
       if (speed == double.infinity || pace == double.infinity) {
         speed = 0.00;
         pace = 0.00;
@@ -376,9 +442,9 @@ class _State extends State<WorkoutWidget> {
 
   void stopRecording() {
     setState(() {
+      print(met);
       userLocationMarker = null;
       isRecording = false;
-
       // Добавление маркера конечной точки маршрута
       if (locationHistory.isNotEmpty) {
         final endLocation = locationHistory.last;
@@ -402,12 +468,19 @@ class _State extends State<WorkoutWidget> {
     });
   }
 
-  void onStart() {
+  void onStart(Map<String, dynamic>? selectedActivity) {
+    if (selectedActivity == null) {
+      return;
+    }
     startRecording();
     setState(
       () {
+        titleScreen = selectedActivity['name']!;
+        type_activity = selectedActivity['id']!;
+        met = selectedActivity['met'];
+        _isFirstWidgetVisible = true;
         date_start = DateTime.now();
-        recordWorkout = true;
+        _isRecordWorkout = true;
         _stopWatchTimer.onStartTimer();
         _stepsPrev = _steps;
         _steps -= _stepsPrev;
@@ -429,7 +502,7 @@ class _State extends State<WorkoutWidget> {
   void onStop() {
     stopRecording();
     date_stop = DateTime.now();
-    recordWorkout = false;
+    _isRecordWorkout = false;
     _stopWatchTimer.onStopTimer();
     _stepsPrev = 0;
     _stepsNow = _steps;
@@ -439,6 +512,7 @@ class _State extends State<WorkoutWidget> {
       MaterialPageRoute(
         builder: (context) => WorkoutResultPage(
           timer: formatTime(_stopWatchTimer.rawTime.value),
+          type_activity: type_activity,
           steps: _stepsNow,
           distance: dist,
           speed: speed,
@@ -711,5 +785,87 @@ class TrackerWidget extends StatelessWidget {
             ),
           ],
         ));
+  }
+}
+
+class DropdownActivity extends StatefulWidget {
+  final Function(Map<String, dynamic>) onActivitySelected;
+
+  const DropdownActivity({Key? key, required this.onActivitySelected})
+      : super(key: key);
+
+  @override
+  _DropdownState createState() => _DropdownState();
+}
+
+class _DropdownState extends State<DropdownActivity> {
+  Map<String, dynamic>? selectedActivity;
+
+  List<Map<String, dynamic>> itemsDropdown = [];
+  String? getActivity;
+
+  @override
+  void initState() {
+    super.initState();
+    getActivities();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: DropdownButton<Map<String, dynamic>>(
+                borderRadius: BorderRadius.circular(10),
+                dropdownColor: PColors.white,
+                hint: Text('Выберите упражнение'),
+                value: selectedActivity,
+                items: itemsDropdown.map((Map<String, dynamic> activity) {
+                  return DropdownMenuItem<Map<String, dynamic>>(
+                    value: activity,
+                    child: Text(activity['name']!),
+                  );
+                }).toList(),
+                onChanged: (Map<String, dynamic>? newValue) {
+                  setState(() {
+                    selectedActivity = newValue;
+                  });
+                  if (newValue != null) {
+                    widget.onActivitySelected(newValue);
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> getActivities() async {
+    var url = Uri.https('utterly-comic-parakeet.ngrok-free.app', "activities");
+    print(url);
+    var response = await http.get(url, headers: {
+      "ngrok-skip-browser-warning": "true",
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    });
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      setState(() {
+        itemsDropdown = data.map((activity) {
+          return {
+            'id': activity['id'] as String,
+            'name': activity['name'] as String,
+            'met': activity['met'],
+          };
+        }).toList();
+      });
+    } else {
+      throw Exception('Failed to load activities');
+    }
   }
 }
